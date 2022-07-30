@@ -22,24 +22,24 @@ class bard():
         self.weapon_delay = 3.04
         self.left_time = period
         
-        self.barrage = 0
-        self.battle = 0
-        self.raging = 0
-        self.radient = 0
+        self.buff_barrage = 0
+        self.buff_battle = 0
+        self.buff_raging = 0
+        self.buff_radient = 0
         
         self.army = 0
         self.mage = 0
         self.wanderer = 0
         
-        self.storm = 0
-        self.caustic = 0
+        self.dot_storm = 0
+        self.dot_caustic = 0
         
-        self.straight = 0
-        self.blast = 0
+        self.available_straight = 0
+        self.available_blast = 0
+        self.available_blood = 3
         
-        self.coda = 0
-        self.pitch = 0
-        self.blood = 3
+        self.stack_coda = 0
+        self.stack_wanderer = 0
         self.soul = 0
         self.army_stack = 0
         
@@ -132,6 +132,19 @@ class bard():
             dmg = 3*dmg
             self.barrage = 0
         return dmg
+    
+    def raging(self):
+        self.raging=20.
+        self.raging_cool = 120.
+    
+    def barrage(self):
+        self.buff_barrage = 10.
+        self.barrage_cool = 120.
+    def radient(self):
+        if (self.army>0 or self.wanderer>0 or self.mage>0):
+            self.buff_radient = 15.
+            self.radient_cool=120.
+            self.coda = 0
         
 
 def f_crit(cr, sub=400, div = 1900):

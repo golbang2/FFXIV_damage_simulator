@@ -41,7 +41,7 @@ class bard():
         self.stack_coda = 0
         self.stack_wanderer = 0
         self.soul = 0
-        self.army_stack = 0
+        self.stack_army = 0
         
     def calculate_dmg(self,potency):
         buff = 1.
@@ -145,7 +145,28 @@ class bard():
             self.buff_radient = 15.
             self.radient_cool=120.
             self.coda = 0
+    def blood(self):
+        dmg = self.calculate_dmg(110)
+        self.available_blood-=1
+        self.blood_cool =15.
         
+        return dmg
+        
+    
+    def empyreal(self):
+        dmg = self.calculate_dmg(220)
+        if self.wanderer>0:
+            if self.stack_wanderer<3:
+                self.stack_wanderer+=1
+        if self.mage>0:
+            if self.available_blood<3:
+                self.available_blood=+1
+        if self.army>0:
+            if self.stack_army<4:
+                self.stack_army+=1
+        
+        return dmg
+    
 
 def f_crit(cr, sub=400, div = 1900):
     p_cr= int(200*(cr - sub)/div+50)

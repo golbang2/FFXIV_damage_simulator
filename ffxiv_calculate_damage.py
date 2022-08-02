@@ -163,14 +163,23 @@ class bard():
             if self.wanderer>0:
                 if self.stack_wanderer<3:
                     self.stack_wanderer+=1
-            if self.mage>0:
+            elif self.mage>0:
                 if self.available_blood<3:
                     self.available_blood=+1
-            if self.army>0:
+            elif self.army>0:
                 if self.stack_army<4:
                     self.stack_army+=1
+        return dmg
+    def pitch(self):
+        if (self.wanderer>0 and self.stack_wanderer>0):
+            if self.stack_wanderer==1:
+                dmg = self.calculate_dmg(100)
+            elif self.stack_wanderer==2:
+                dmg = self.calculate_dmg(220)
+            elif self.stack_wanderer==3:
+                dmg = self.calculate_dmg(360)
+            
             return dmg
-    
 
 def f_crit(cr, sub=400, div = 1900):
     p_cr= int(200*(cr - sub)/div+50)

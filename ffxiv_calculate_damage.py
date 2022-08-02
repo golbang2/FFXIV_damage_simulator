@@ -134,38 +134,42 @@ class bard():
         return dmg
     
     def raging(self):
-        self.raging=20.
-        self.raging_cool = 120.
-    
+        if (self.raging_cool==0 and self.ngc>0):
+            self.raging=20.
+            self.raging_cool = 120.
+        
     def barrage(self):
-        self.buff_barrage = 10.
-        self.barrage_cool = 120.
+        if (self.barrage_cool==0 and self.ngc>0):
+            self.buff_barrage = 10.
+            self.barrage_cool = 120.
+            
     def radient(self):
-        if (self.army>0 or self.wanderer>0 or self.mage>0):
-            self.buff_radient = 15.
-            self.radient_cool=120.
-            self.coda = 0
+        if (self.redient_cool==0 and self.ngc>0):
+            if (self.army>0 or self.wanderer>0 or self.mage>0):
+                self.buff_radient = 15.
+                self.radient_cool=120.
+                self.coda = 0
+                
     def blood(self):
-        dmg = self.calculate_dmg(110)
-        self.available_blood-=1
-        self.blood_cool =15.
-        
+        if (self.available_blood>0 and self.ngc>0): 
+            dmg = self.calculate_dmg(110)
+            self.available_blood-=1
+            self.blood_cool =15.
         return dmg
-        
     
     def empyreal(self):
-        dmg = self.calculate_dmg(220)
-        if self.wanderer>0:
-            if self.stack_wanderer<3:
-                self.stack_wanderer+=1
-        if self.mage>0:
-            if self.available_blood<3:
-                self.available_blood=+1
-        if self.army>0:
-            if self.stack_army<4:
-                self.stack_army+=1
-        
-        return dmg
+        if (self.empyreal_cool==0 and self.ngc>0):
+            dmg = self.calculate_dmg(220)
+            if self.wanderer>0:
+                if self.stack_wanderer<3:
+                    self.stack_wanderer+=1
+            if self.mage>0:
+                if self.available_blood<3:
+                    self.available_blood=+1
+            if self.army>0:
+                if self.stack_army<4:
+                    self.stack_army+=1
+            return dmg
     
 
 def f_crit(cr, sub=400, div = 1900):

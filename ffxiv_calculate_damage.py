@@ -178,8 +178,12 @@ class bard():
                 dmg = self.calculate_dmg(220)
             elif self.stack_wanderer==3:
                 dmg = self.calculate_dmg(360)
-            
             return dmg
+        
+    def wanderer_minuet(self):
+        if self.wanderer_cool==0:
+            self.wanderer = 45
+            self.stack_coda +=1
 
 def f_crit(cr, sub=400, div = 1900):
     p_cr= int(200*(cr - sub)/div+50)
@@ -214,16 +218,20 @@ def auto_dmg(stat,weapon,delay,main=390,job=115):
     auto = int(int(390*115/1000)+weapon*delay/3)
     return int(atk*auto)
 
+def f_gc(spd):
+    return int(2500*(1000+math.ceil(130*(400-spd)/1900))/10000)/100
 
 period = 300
-gc = 2.47
-cr = 1945
-dh = 1594
-dt = 1146
+#cr = 1945
+cr = 2017
+#dh = 1594
+dt = 1097
+#dt = 1146
+dh = 1811
 spd = 593
 stat = 2347
 wd = 115
-weapon_delay = 3.04
+weapon_delay = 3.2
 
 main = 390
 sub = 400
@@ -232,4 +240,4 @@ div = 1900
 pot = 2.2
 pcr,dcr = f_crit(cr)
 pdh = f_dh(dh)
-
+gc = f_gc(spd)

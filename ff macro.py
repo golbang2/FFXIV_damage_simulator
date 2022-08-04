@@ -72,7 +72,6 @@ def quest(iteration):
         click(877,333,repeat = 2) 
         time.sleep(1)
         print(i)
-
 process_name = 'FINAL FANTASY XIV'
 
 iteration = 100
@@ -86,11 +85,11 @@ interaction.call_window('FINAL FANTASY XIV')
 time.sleep(2)
 x,y = pyautogui.position()
 
-for i in range(12):
+for i in range(30):
     d1 = datetime.datetime.now()
     click(x,y)
     time.sleep(0.5)
     press_key('B')
     d2 = datetime.datetime.now()
     ddt = (d2-d1).total_seconds()
-    time.sleep(31-ddt)
+    time.sleep(37-ddt)

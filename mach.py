@@ -32,12 +32,12 @@ class machinist():
     def calculate_dmg(self,potency,buff=1.,reassemble = 0):
         pcr = self.pcr
         pdh = self.pdh
-        
+        is_cr = 0
+        is_dh = 0
         d1 = int(potency * self.atk * self.dt)
         d2 = int(int(d1*int(self.wd))*self.jobmod/100)
         
         if reassemble == 0:
-        
             if np.random.random()<pcr:
                 d2 = int(d2 * self.dcr)
                 is_cr = 1
@@ -58,6 +58,8 @@ class machinist():
     def auto_shot(self):
         d = f.auto_dmg(self.dex,self.weapon, self.weapon_delay)
         d = int(f.random_dmg(d))
+        is_cr = 0
+        is_dh = 0
         if np.random.random()<f.pcr:
             d = int(d * self.dcr)
             is_cr = 1

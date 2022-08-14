@@ -9,12 +9,14 @@ import numpy as np
 import pandas as pd
 
 class read_from_csv():
-    def __init__(self,path = "D:/game_plan/FFXIV/Jomusse_first.csv"):
+    def __init__(self, path = "D:/game_plan/FFXIV/Jomusse_first.csv", gc = 2.5):
         self.activation_log = pd.read_csv(path)
         self.activation_log = self.activation_log.fillna(0)
+        self.gc = gc
         
         potency_list = []
         auto_list = []
+        gc_list = []
         
         for i in range(len(self.activation_log)-1,0,-1):
             if (self.activation_log['Event'][i][:8]=='Jo Musse' or self.activation_log['Event'][i][4:12] == 'Jo Musse'):
@@ -53,7 +55,16 @@ class read_from_csv():
             else:
                 auto_list.append(0)
                 
-        self.activation_log.insert(4,'potency',potency_list)
+            if (i[:2]=='드릴' or i[:2]=='사슬' or i[:2]=='회전' or i[:2]=='열분' or i[:2]=='열슬' or i[:2]=='열정'):
+                gc_list.append(self.gc)
+            elif i[:2]=='열기':
+                gc_list.append(1.5)
+            else:
+                gc_list.append(0)
+                
+
         self.activation_log.insert(2,'auto_attack',auto_list)
+        self.activation_log.insert(3,'global_cooldown',gc_list)
+        self.activation_log.insert(4,'potency',potency_list)
         
         

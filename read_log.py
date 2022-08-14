@@ -10,16 +10,17 @@ import pandas as pd
 
 class read_from_csv():
     def __init__(self,path = "D:/game_plan/FFXIV/Jomusse_first.csv"):
-        deal_log = pd.read_csv(path)
-        deal_log = deal_log.fillna(0)
+        self.activation_log = pd.read_csv(path)
+        self.activation_log = self.activation_log.fillna(0)
         
         potency_list = []
+        auto_list = []
         
-        for i in range(len(deal_log)-1,0,-1):
-            if (deal_log['Event'][i][:8]=='Jo Musse' or deal_log['Event'][i][4:12] == 'Jo Musse'):
-                deal_log = deal_log.drop(index=i)
+        for i in range(len(self.activation_log)-1,0,-1):
+            if (self.activation_log['Event'][i][:8]=='Jo Musse' or self.activation_log['Event'][i][4:12] == 'Jo Musse'):
+                self.activation_log = self.activation_log.drop(index=i)
             
-        for i in deal_log['Event']:
+        for i in self.activation_log['Event']:
             if i[:2]=='드릴':
                 potency_list.append(570)
             if i[:3]=='사슬닻':
@@ -46,6 +47,13 @@ class read_from_csv():
                 potency_list.append(750)
             if i[:4]=='자동공격':
                 potency_list.append(100)
+            
+            if i[:4]=='자동공격':
+                auto_list.append(1)
+            else:
+                auto_list.append(0)
                 
-        self.deal_log.insert(4,'potency',potency_list)
+        self.activation_log.insert(4,'potency',potency_list)
+        self.activation_log.insert(2,'auto_attack',auto_list)
+        
         

@@ -19,7 +19,7 @@ class bard():
         self.atk = f.f_atk(stat)
         self.wd = f.f_wd(wd)
         self.spd = f.f_spd(spd)
-        self.jobmod = 1.1*1.2
+        self.jobmod = 1.2*1.1
         self.weapon_delay = 3.04
         self.left_time = period
         
@@ -56,11 +56,11 @@ class bard():
         if self.army>0:
             pdh +=0.03
         
-        if self.battle>0:
+        if self.buff_battle>0:
             pdh +=0.2
-        if self.raging>0:
+        if self.buff_raging>0:
             buff = buff*1.15
-        if self.radient>0:
+        if self.buff_radient>0:
             buff = buff*(1+self.coda*0.02)
         
         d1 = int(potency * self.atk * self.dt)

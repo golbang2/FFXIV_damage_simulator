@@ -95,3 +95,17 @@ for i in range(10):
     ddt = (d2-d1).total_seconds()
     time.sleep(43-ddt)
 '''
+
+for i in range(10):
+    d1 = datetime.datetime.now()
+    click(x,y)
+    time.sleep(0.5)
+    press_key('Z')
+    d2 = datetime.datetime.now()
+    ddt = (d2-d1).total_seconds()
+    time.sleep(38-ddt)
+    d1 = datetime.datetime.now()
+    press_key('X')
+    d2 = datetime.datetime.now()
+    ddt = (d2-d1).total_seconds()
+    time.sleep(27-ddt)

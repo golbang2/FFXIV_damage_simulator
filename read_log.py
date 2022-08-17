@@ -7,64 +7,77 @@ Created on Thu Aug  4 20:17:23 2022
 
 import numpy as np
 import pandas as pd
+import re
 
 class read_from_csv():
-    def __init__(self, path = "D:/game_plan/FFXIV/Jomusse_first.csv", gc = 2.5):
+    def __init__(self, path = "D:/game_plan/FFXIV/FF Logs - Combat Analysis for FF1.csv", gc = 2.5):
         self.activation_log = pd.read_csv(path)
         self.activation_log = self.activation_log.fillna(0)
         self.gc = gc
         
+        p = re.compile('prepares')
+        for i in range(len(self.activation_log)-1,0,-1):
+            if (p.search(self.activation_log['Event'][i]) == None):
+                self.activation_log = self.activation_log.drop(index=i)
+        
+    def add_potency(self):
         potency_list = []
         auto_list = []
         gc_list = []
-        
-        for i in range(len(self.activation_log)-1,0,-1):
-            if (self.activation_log['Event'][i][:8]=='Jo Musse' or self.activation_log['Event'][i][4:12] == 'Jo Musse'):
-                self.activation_log = self.activation_log.drop(index=i)
-            
+        get_skill_name = re.compile("\s\s(.+?)\s\s")
         for i in self.activation_log['Event']:
-            if i[:2]=='드릴':
-                potency_list.append(570)
-            if i[:3]=='사슬닻':
-                potency_list.append(570)
-            if i[:3]=='회전톱':
-                potency_list.append(570)
-            if i[:4]=='열분열탄':
-                potency_list.append(380)
-            if i[:5]=='열슬러그탄':
-                potency_list.append(380)
-            if i[:4]=='열정밀탄':
-                potency_list.append(460)
-            if i[:4]=='열기분사':
-                potency_list.append(170)
-            if i[:3]=='가우스':
-                potency_list.append(120)
-            if i[:4]=='도탄사격':
-                potency_list.append(120)
-            if i[2:5]=='퀸펀치':
-                potency_list.append(120)
-            if i[2:5]=='퀸파일':
-                potency_list.append(650)
-            if i[2:5]=='퀸충돌':
-                potency_list.append(750)
-            if i[:4]=='자동공격':
-                potency_list.append(100)
+            skill_name = get_skill_name.findall(i)[0]
             
-            if i[:4]=='자동공격':
+            if skill_name=='Drill':
+                potency_list.append(570)
+                gc_list.append(self.gc)
+            elif skill_name=='Air Anchor':
+                potency_list.append(570)
+                gc_list.append(self.gc)
+            elif skill_name=='Chain Saw':
+                potency_list.append(570)
+                gc_list.append(self.gc)
+            elif skill_name== 'Heated Split Shot':
+                potency_list.append(380)
+                gc_list.append(self.gc)
+            elif skill_name=='Heated Slug Shot':
+                potency_list.append(380)
+                gc_list.append(self.gc)
+            elif skill_name=='Heated Clean Shot':
+                potency_list.append(460)
+                gc_list.append(self.gc)
+            elif skill_name=='Heat Blast':
+                potency_list.append(170)
+                gc_list.append(1.5)
+            elif skill_name=='Gauss Round':
+                potency_list.append(120)
+                gc_list.append(0)
+            elif skill_name=='Ricochet':
+                potency_list.append(120)
+                gc_list.append(0)
+            elif skill_name=='Arm Punch':
+                potency_list.append(120)
+                gc_list.append(0)
+            elif skill_name=='Pile Bunker':
+                potency_list.append(650)
+                gc_list.append(0)
+            elif skill_name=='Crowned Collider':
+                potency_list.append(750)
+                gc_list.append(0)
+            elif skill_name=='Shot':
+                potency_list.append(100)
+                gc_list.append(0)
+            else:
+                print(skill_name)
+            
+            if skill_name == 'Shot':
                 auto_list.append(1)
             else:
                 auto_list.append(0)
-                
-            if (i[:2]=='드릴' or i[:2]=='사슬' or i[:2]=='회전' or i[:2]=='열분' or i[:2]=='열슬' or i[:2]=='열정'):
-                gc_list.append(self.gc)
-            elif i[:2]=='열기':
-                gc_list.append(1.5)
-            else:
-                gc_list.append(0)
-                
 
         self.activation_log.insert(2,'auto_attack',auto_list)
         self.activation_log.insert(3,'global_cooldown',gc_list)
         self.activation_log.insert(4,'potency',potency_list)
+        return self.activation_log
         
         

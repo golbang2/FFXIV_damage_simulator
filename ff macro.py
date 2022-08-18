@@ -85,17 +85,17 @@ interaction.call_window('FINAL FANTASY XIV')
 time.sleep(2)
 x,y = pyautogui.position()
 
-'''
-for i in range(10):
+
+for i in range(25):
     d1 = datetime.datetime.now()
     click(x,y)
     time.sleep(0.5)
     press_key('B')
     d2 = datetime.datetime.now()
     ddt = (d2-d1).total_seconds()
-    time.sleep(43-ddt)
-'''
+    time.sleep(42-ddt)
 
+'''
 for i in range(10):
     d1 = datetime.datetime.now()
     click(x,y)
@@ -109,3 +109,4 @@ for i in range(10):
     d2 = datetime.datetime.now()
     ddt = (d2-d1).total_seconds()
     time.sleep(27-ddt)
+'''

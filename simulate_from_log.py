@@ -13,10 +13,11 @@ import bard
 import pandas as pd
 
 class read_machinist():
-    def __init__(self):
-        active_log = read_log.read_from_csv("D:/game_plan/FFXIV/Jomusse_first.csv").activation_log
+    def __init__(self,file_name="D:/game_plan/FFXIV/Jomusse_first.csv"):
+        active_log = read_log.read_from_csv(file_name).activation_log
         self.character = mach.machinist(2.5, 2121, 1626,1615,2575,120,400)
-
+        
+        self.simulated_damage = self.simulate_from_log(active_log)
         
     def simulate_from_log(self,active_log):
         damage_list = []
@@ -42,12 +43,13 @@ class read_machinist():
         simulated_damage = damage_dataframe(damage_list, crit_list, dhit_list)
         return simulated_damage
         
-        
-        
 class read_bard():
-    def __init__(self):
-        active_log = read_log.read_from_csv("D:/game_plan/FFXIV/Jomusse_first.csv").activation_log
+    def __init__(self,file_name):
+        active_log = read_log.read_from_csv(file_name).activation_log
         self.character = bard.bard(2.5, 2121, 1626,1615,2575,120,400)
+        
+        self.simulated_damage = self.simulate_from_log(active_log)
+        
         
         
 def damage_dataframe(dmg_list, crit_list, dhit_list):

@@ -15,10 +15,11 @@ import pandas as pd
 class read_machinist():
     def __init__(self,file_name="D:/game_plan/FFXIV/FF Logs - Combat Analysis for FF1.csv"):
         
+        gc = 2.5
         reading_log = read_log.read_from_csv(file_name)
         self.active_log = reading_log.add_potency()
-        self.period = np.sum(self.active_log['global_cooldown']) - 2.5
-        self.character = mach.machinist(gc = 2.5, cr = 2121, dh = 1626, dt = 1615, stat = 2575, wd = 120,spd = 400, period = self.period)
+        self.period = np.sum(self.active_log['global_cooldown']) - gc
+        self.character = mach.machinist(gc = gc, cr = 2121, dh = 1626, dt = 1615, stat = 2575, wd = 120,spd = 400, period = self.period)
         
     def simulate_from_log(self):
         damage_list = []
@@ -53,7 +54,7 @@ class read_machinist():
         for i in log_list:
             dps = i['damage']/self.period
             dps_list.append(dps)
-        return log_list
+        return log_list, np.mean(dps_list)
             
 class read_bard():
     def __init__(self,file_name):

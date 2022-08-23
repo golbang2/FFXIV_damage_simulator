@@ -22,6 +22,7 @@ class bard():
         self.jobmod = 1.2*1.1
         self.weapon_delay = 3.04
         self.left_time = period
+        self.elapsed = 0
         
         self.buff_barrage = 0
         self.buff_battle = 0
@@ -110,6 +111,7 @@ class bard():
         dmg = self.calculate_dmg(100)
         self.storm = 45
         self.ngc = 2
+        self.start_storm = self.elapsed
         if self.barrage:
             dmg = 3*dmg
             self.barrage = 0
@@ -119,6 +121,7 @@ class bard():
         dmg = self.calculate_dmg(150)
         self.caustic = 45
         self.ngc = 2
+        self.start_caustic = self.elapsed
         if self.barrage:
             dmg = 3*dmg
             self.barrage = 0
@@ -171,6 +174,7 @@ class bard():
                 if self.stack_army<4:
                     self.stack_army+=1
         return dmg
+    
     def pitch(self):
         if (self.wanderer>0 and self.stack_wanderer>0):
             if self.stack_wanderer==1:
@@ -186,6 +190,31 @@ class bard():
             self.wanderer = 45
             self.stack_coda +=1
             self.wanderer_cool = 120
+            dmg = self.calculate_dmg(100)
+            self.start_wanderer = self.elapsed
+            return dmg
+    
+    def mage_ballad(self):
+        if self.mage_cool ==0:
+            self.mage = 30
+            self.stack_coda +=1
+            self.mage_cool = 120
+            dmg = self.calculate_dmg(100)
+            self.start_mage = self.elapsed
+            return dmg
+    
+    def army_paeon(self):
+        if self.army_cool ==0:
+            self.army = 45
+            self.stack_coda +=1
+            self.mage_cool = 120
+            dmg = self.calculate_dmg(100)
+            self.start_army = self.elapsed
+            return dmg
+    
+    def tick(self):
+        self.elapsed += 0.01
+        self.
             
 period = 300
 #cr = 1945

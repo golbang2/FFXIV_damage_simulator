@@ -215,6 +215,9 @@ class bard():
     def tick(self):
         self.elapsed += 0.01
         self.
+        
+        if self.elapsed == self.left_time:
+            self.done=1
             
 period = 300
 #cr = 1945

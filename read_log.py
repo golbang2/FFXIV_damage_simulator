@@ -99,38 +99,41 @@ class read_bard_log():
         
         for i in self.activation_log['Event']:
             skill_name = get_skill_name.findall(i)[0]
-            if skill_name=='':
-                potency_list.append(570)
+            if skill_name=='Stormbite':
+                potency_list.append(100)
                 gc_list.append(self.gc)
-            elif skill_name=='':
-                potency_list.append(570)
-                gc_list.append(self.gc)
-            elif skill_name=='':
-                potency_list.append(570)
-                gc_list.append(self.gc)
-            elif skill_name== '':
-                potency_list.append(380)
-                gc_list.append(self.gc)
-            elif skill_name=='':
-                potency_list.append(380)
-                gc_list.append(self.gc)
-            elif skill_name=='':
-                potency_list.append(460)
-                gc_list.append(self.gc)
-            elif skill_name=='':
-                potency_list.append(120)
+            elif skill_name=="Wanderer's Minuet":
+                potency_list.append(100)
                 gc_list.append(0)
-            elif skill_name=='':
-                potency_list.append(120)
+            elif skill_name=='Caustic Bite':
+                potency_list.append(150)
+                gc_list.append(self.gc)
+            elif skill_name== 'Bloodletter':
+                potency_list.append(110)
                 gc_list.append(0)
-            elif skill_name=='':
-                potency_list.append(120)
+            elif skill_name=='Empyreal Arrow':
+                potency_list.append(200)
                 gc_list.append(0)
-            elif skill_name=='Pile Bunker':
-                potency_list.append(650)
+            elif skill_name=='Refulgent Arrow':
+                potency_list.append(280)
+                gc_list.append(self.gc)
+            elif skill_name=='Burst Shot':
+                potency_list.append(220)
+                gc_list.append(self.gc)
+            elif skill_name=='Sidewinder':
+                potency_list.append(300)
                 gc_list.append(0)
-            elif skill_name=='Crowned Collider':
-                potency_list.append(750)
+            elif skill_name=='Iron Jaws':
+                potency_list.append(100)
+                gc_list.append(self.gc)
+            elif skill_name=="Pitch Perfect":
+                potency_list.append(360)
+                gc_list.append(0)
+            elif skill_name=="Mage's Ballad":
+                potency_list.append(100)
+                gc_list.append(0)
+            elif skill_name=="Army's Paeon":
+                potency_list.append(100)
                 gc_list.append(0)
             elif skill_name=='Shot':
                 potency_list.append(100)

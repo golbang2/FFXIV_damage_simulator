@@ -231,6 +231,8 @@ class bard():
             if self.army>0:
                 if self.stack_army<4:
                     self.stack_army+=1
+            if self.soul>100:
+                self.soul+=5
         
     def damage_over_tick(self):
         if self.storm>0:

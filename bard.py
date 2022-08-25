@@ -214,10 +214,29 @@ class bard():
     
     def tick(self):
         self.elapsed += 0.01
-        self.
+        if self.elapsed%3==0:
+            self.effect_over_tick(self.elapsed)
+            self.damage_over_tick(self.elapsed)
         
         if self.elapsed == self.left_time:
             self.done=1
+            
+    def effect_over_tick(self,elapsed):
+        if np.random.random()<0.8:
+            if self.wanderer>0:
+                if self.stack_wanderer<3:
+                    self.stack_wanderer+=1
+            if self.mage>0:
+                self.blood_cool-=7.5
+            if self.army>0:
+                if self.stack_army<4:
+                    self.stack_army+=1
+        
+    def damage_over_tick(self):
+        if self.storm>0:
+            self.calculate_DOT(25)
+        if self.caustic>0:
+            self.calculate_DOT(20)
             
 period = 300
 #cr = 1945

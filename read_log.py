@@ -99,34 +99,31 @@ class read_bard_log():
         
         for i in self.activation_log['Event']:
             skill_name = get_skill_name.findall(i)[0]
-            if skill_name=='Drill':
+            if skill_name=='':
                 potency_list.append(570)
                 gc_list.append(self.gc)
-            elif skill_name=='Air Anchor':
+            elif skill_name=='':
                 potency_list.append(570)
                 gc_list.append(self.gc)
-            elif skill_name=='Chain Saw':
+            elif skill_name=='':
                 potency_list.append(570)
                 gc_list.append(self.gc)
-            elif skill_name== 'Heated Split Shot':
+            elif skill_name== '':
                 potency_list.append(380)
                 gc_list.append(self.gc)
-            elif skill_name=='Heated Slug Shot':
+            elif skill_name=='':
                 potency_list.append(380)
                 gc_list.append(self.gc)
-            elif skill_name=='Heated Clean Shot':
+            elif skill_name=='':
                 potency_list.append(460)
                 gc_list.append(self.gc)
-            elif skill_name=='Heat Blast':
-                potency_list.append(170)
-                gc_list.append(1.5)
-            elif skill_name=='Gauss Round':
+            elif skill_name=='':
                 potency_list.append(120)
                 gc_list.append(0)
-            elif skill_name=='Ricochet':
+            elif skill_name=='':
                 potency_list.append(120)
                 gc_list.append(0)
-            elif skill_name=='Arm Punch':
+            elif skill_name=='':
                 potency_list.append(120)
                 gc_list.append(0)
             elif skill_name=='Pile Bunker':

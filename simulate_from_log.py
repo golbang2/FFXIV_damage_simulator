@@ -59,7 +59,7 @@ class read_machinist():
 class read_bard():
     def __init__(self,file_name):
         active_log = read_log.read_from_csv(file_name).activation_log
-        self.character = bard.bard(gc = 2.08, cr = 2229, dh = 1662, dt = 1381, stat = 2575, wd = 120,spd = 479, period = 120)
+        self.character = bard.bard(gc = 2.48, cr = 2229, dh = 1662, dt = 1381, stat = 2575, wd = 120,spd = 479, period = 120)
         self.simulated_damage = self.simulate_from_log(active_log)
     
     def simulate_from_log(self,active_log):
@@ -73,6 +73,8 @@ class read_bard():
                 crit_list.append(is_cr)
                 dhit_list.append(is_dh)
                 damage_list.append(dmg)
+
+
             
 def damage_dataframe(dmg_list, crit_list, dhit_list):
     df_damage = pd.DataFrame(dmg_list, columns = ['damage'])

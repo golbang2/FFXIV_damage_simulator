@@ -74,14 +74,16 @@ class read_mach_log():
                 auto_list.append(1)
             else:
                 auto_list.append(0)
-
-        self.activation_log.insert(2,'auto_attack',auto_list)
-        self.activation_log.insert(3,'global_cooldown',gc_list)
-        self.activation_log.insert(4,'potency',potency_list)
+        self.make_dataframe(auto_list,gc_list,potency_list)
+        
+    def make_dataframe(self,auto, gc, potency):
+        self.activation_log.insert(2,'auto_attack',auto)
+        self.activation_log.insert(3,'global_cooldown',gc)
+        self.activation_log.insert(4,'potency',potency)
         return self.activation_log
         
 class read_bard_log():
-    def __init__(self,path = "D:/game_plan/FFXIV/FF Logs - Combat Analysis for FF1.csv", gc = 2.08):
+    def __init__(self,path = 'd:/game_plan/FFXIV/noya ki-erichthonios.csv', gc = 2.48):
         self.activation_log = pd.read_csv(path)
         self.activation_log = self.activation_log.fillna(0)
         self.gc = gc
@@ -102,7 +104,7 @@ class read_bard_log():
             if skill_name=='Stormbite':
                 potency_list.append(100)
                 gc_list.append(self.gc)
-            elif skill_name=="Wanderer's Minuet":
+            elif skill_name=="the Wanderer's Minuet":
                 potency_list.append(100)
                 gc_list.append(0)
             elif skill_name=='Caustic Bite':
@@ -138,6 +140,12 @@ class read_bard_log():
             elif skill_name=='Shot':
                 potency_list.append(100)
                 gc_list.append(0)
+            elif skill_name == 'Apex Arrow':
+                potency_list.append(600)
+                gc_list.append(self.gc)
+            elif skill_name == 'Blast Arrow':
+                potency_list.append(600)
+                gc_list.append(self.gc)
             else:
                 print(skill_name)
             
@@ -145,4 +153,11 @@ class read_bard_log():
                 auto_list.append(1)
             else:
                 auto_list.append(0)
+    
+        self.make_dataframe(auto_list,gc_list,potency_list)
         
+    def make_dataframe(self,auto, gc, potency):
+        self.activation_log.insert(2,'auto_attack',auto)
+        self.activation_log.insert(3,'global_cooldown',gc)
+        self.activation_log.insert(4,'potency',potency)
+        return self.activation_log

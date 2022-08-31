@@ -34,7 +34,14 @@ class bard():
         self.wanderer = 0
         
         self.dot_storm = 0
+        self.dotbuff_storm_mod = 1.
+        self.dotbuff_storm_dhmod = 0.
+        self.dotbuff_storm_crmod = 0.
+        
         self.dot_caustic = 0
+        self.dotbuff_caustic_mod = 1.
+        self.dotbuff_caustic_dhmod = 0.
+        self.dotbuff_caustic_crmod = 0.
         
         self.available_straight = 0
         self.available_blast = 0
@@ -109,22 +116,30 @@ class bard():
     
     def stormbite(self):
         dmg = self.calculate_dmg(100)
-        self.storm = 45
+        self.dot_storm = 45
         self.ngc = 2
         self.start_storm = self.elapsed
-        if self.barrage:
-            dmg = 3*dmg
-            self.barrage = 0
+        if self.buff_battle>0:
+            self.dotbuff_caustic_dhmod+=0.2
+        if self.buff_raging>0:
+            self.dotbuff_caustic_mod+=0.15
+        if self.buff_radient>0:
+            self.dotbuff_caustic_mod+=0.06
+        
         return dmg
     
     def causticbite(self):
         dmg = self.calculate_dmg(150)
-        self.caustic = 45
+        self.dot_caustic = 45
         self.ngc = 2
         self.start_caustic = self.elapsed
-        if self.barrage:
-            dmg = 3*dmg
-            self.barrage = 0
+        if self.buff_battle>0:
+            self.dotbuff_caustic_dhmod+=0.2
+        if self.buff_raging>0:
+            self.dotbuff_caustic_mod+=0.15
+        if self.buff_radient>0:
+            self.dotbuff_caustic_mod+=0.06
+        
         return dmg
     
     def iron_jaws(self):
@@ -234,29 +249,39 @@ class bard():
             if self.soul>100:
                 self.soul+=5
         
+        
     def damage_over_tick(self):
         if self.storm>0:
             self.calculate_DOT(25)
         if self.caustic>0:
             self.calculate_DOT(20)
-            
-period = 300
-#cr = 1945
-cr = 2017
-#dh = 1594
-dt = 1097
-#dt = 1146
-dh = 1811
-spd = 593
-stat = 2347
-wd = 115
-weapon_delay = 3.2
+    
+    def time_elapse(self,gc):
+        self.elapsed +=gc
+        
+    def calculate_gc(self,stack_army):
+        gc = self.gc*(1-stack_army*0.04)
+        return gc
 
-main = 390
-sub = 400
-div = 1900
+if __name__=='__main__':
+    #https://etro.gg/gearset/cec981af-25c7-4ffb-905e-3024411b797a
+    period = 300
+    cr = 2229
+    dt = 1381
+    dh = 1662
+    spd = 479
+    stat = 2575
+    wd = 120
+    weapon_delay = 3.2
 
-pot = 2.2
-pcr,dcr = f.f_crit(cr)
-pdh = f.f_dh(dh)
-gc = f.f_gc(spd)
+    
+    main = 390
+    sub = 400
+    div = 1900
+    
+    pot = 2.2
+    pcr,dcr = f.f_crit(cr)
+    pdh = f.f_dh(dh)
+    gc = f.f_gc(spd)
+    
+    agent = bard(gc,cr,dh,dt,stat,wd,spd,period)

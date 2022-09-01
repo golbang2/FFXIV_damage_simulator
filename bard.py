@@ -84,15 +84,17 @@ class bard():
         
         return int(dmg)
     
-    def calculate_DOT(self,potency):
+    def calculate_DOT(self,potency,buff,dhmod,crmod):
         d1 = potency*self.atk*f.f_det(self.dt)/100
         d2 = d1 * self.spd*self.wd*self.jobmod
         d3 = int(f.random_dmg(d2))
         
-        if np.random.random()<self.pcr:
+        if np.random.random()<self.pcr+crmod:
             d3 = int(d3 * self.dcr)
-        if np.random.random()<self.pdh:
+        if np.random.random()<self.pdh+dhmod:
             d3 = int(d3*1.25)
+        d3 = d3 * buff
+        
         return d3
     
     def auto_shot(self):
@@ -119,12 +121,17 @@ class bard():
         self.dot_storm = 45
         self.ngc = 2
         self.start_storm = self.elapsed
+        
+        self.dotbuff_storm_mod = 1.
+        self.dotbuff_storm_dhmod = 0.
+        self.dotbuff_storm_crmod = 0.
+        
         if self.buff_battle>0:
-            self.dotbuff_caustic_dhmod+=0.2
+            self.dotbuff_storm_dhmod=0.2
         if self.buff_raging>0:
-            self.dotbuff_caustic_mod+=0.15
+            self.dotbuff_storm_mod*=1.15
         if self.buff_radient>0:
-            self.dotbuff_caustic_mod+=0.06
+            self.dotbuff_storm_mod*=1.06
         
         return dmg
     
@@ -133,12 +140,17 @@ class bard():
         self.dot_caustic = 45
         self.ngc = 2
         self.start_caustic = self.elapsed
+        
+        self.dotbuff_caustic_mod = 1.
+        self.dotbuff_caustic_dhmod = 0.
+        self.dotbuff_caustic_crmod = 0.
+        
         if self.buff_battle>0:
             self.dotbuff_caustic_dhmod+=0.2
         if self.buff_raging>0:
-            self.dotbuff_caustic_mod+=0.15
+            self.dotbuff_caustic_mod*=1.15
         if self.buff_radient>0:
-            self.dotbuff_caustic_mod+=0.06
+            self.dotbuff_caustic_mod*=1.06
         
         return dmg
     
@@ -147,9 +159,31 @@ class bard():
         self.caustic = 45
         self.storm = 45
         self.ngc = 2
-        if self.barrage:
-            dmg = 3*dmg
-            self.barrage = 0
+        self.start_caustic = self.elapsed
+        self.start_storm = self.elapsed
+        
+        self.dotbuff_storm_mod = 1.
+        self.dotbuff_storm_dhmod = 0.
+        self.dotbuff_storm_crmod = 0.
+        
+        if self.buff_battle>0:
+            self.dotbuff_storm_dhmod=0.2
+        if self.buff_raging>0:
+            self.dotbuff_storm_mod*=1.15
+        if self.buff_radient>0:
+            self.dotbuff_storm_mod*=1.06
+        
+        self.dotbuff_caustic_mod = 1.
+        self.dotbuff_caustic_dhmod = 0.
+        self.dotbuff_caustic_crmod = 0.
+        
+        if self.buff_battle>0:
+            self.dotbuff_caustic_dhmod+=0.2
+        if self.buff_raging>0:
+            self.dotbuff_caustic_mod*=1.15
+        if self.buff_radient>0:
+            self.dotbuff_caustic_mod*=1.06
+        
         return dmg
     
     def raging(self):
@@ -260,8 +294,7 @@ class bard():
         self.elapsed +=gc
         
     def calculate_gc(self,stack_army):
-        gc = self.gc*(1-stack_army*0.04)
-        return gc
+        self.gc_ap = self.gc*(1-stack_army*0.04)
 
 if __name__=='__main__':
     #https://etro.gg/gearset/cec981af-25c7-4ffb-905e-3024411b797a

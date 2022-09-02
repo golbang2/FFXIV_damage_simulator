@@ -6,7 +6,6 @@ Created on Wed Aug  3 14:10:48 2022
 """
 import ffxiv_calculate_damage as f
 import numpy as np
-import math
 
 class bard():
     def __init__(self,gc,cr,dh,dt,stat,wd,spd,period):
@@ -51,6 +50,21 @@ class bard():
         self.stack_wanderer = 0
         self.soul = 0
         self.stack_army = 0
+        
+        self.calculate_gc(0)
+        self.initialize_cooldown()
+        
+    def initialize_cooldown(self):
+        self.cool_wanderer = 0
+        self.cool_mage = 0
+        self.cool_army = 0
+        self.cool_raging = 0
+        self.cool_radient = 0
+        self.cool_barrage = 0
+        self.cool_battle = 0
+        
+    def check_buff(self):
+        
         
     def calculate_dmg(self,potency):
         buff = 1.
@@ -110,7 +124,7 @@ class bard():
         dmg = self.calculate_dmg(220)
         if self.straight:
             dmg = self.calculate_dmg(280)
-        self.ngc = 2
+        self.weapon_skill()
         if self.barrage:
             dmg = 3*dmg
             self.barrage = 0
@@ -119,7 +133,7 @@ class bard():
     def stormbite(self):
         dmg = self.calculate_dmg(100)
         self.dot_storm = 45
-        self.ngc = 2
+        self.weapon_skill()
         self.start_storm = self.elapsed
         
         self.dotbuff_storm_mod = 1.
@@ -138,7 +152,7 @@ class bard():
     def causticbite(self):
         dmg = self.calculate_dmg(150)
         self.dot_caustic = 45
-        self.ngc = 2
+        self.weapon_skill()
         self.start_caustic = self.elapsed
         
         self.dotbuff_caustic_mod = 1.
@@ -158,7 +172,7 @@ class bard():
         dmg = self.calculate_dmg(100)
         self.caustic = 45
         self.storm = 45
-        self.ngc = 2
+        self.weapon_skill()
         self.start_caustic = self.elapsed
         self.start_storm = self.elapsed
         
@@ -187,41 +201,39 @@ class bard():
         return dmg
     
     def raging(self):
-        if (self.raging_cool==0 and self.ngc>0):
-            self.raging=20.
-            self.raging_cool = 120.
+        if (self.cool_raging<self.gc_ap and self.ngc>0):
+            self.buff_raging=20.
+            self.cool_raging = 120.
+            
+    def battle_voice(self):
+        if (self.cool_battle<self.gc_ap and self.ngc>0):
+            self.buff_battle = 15
+            self.cool_battle = 120
         
     def barrage(self):
-        if (self.barrage_cool==0 and self.ngc>0):
+        if (self.cool_barrage<self.gc_ap and self.ngc>0):
             self.buff_barrage = 10.
-            self.barrage_cool = 120.
+            self.cool_barrage = 120.
+            self.straight = 1
             
     def radient(self):
-        if (self.redient_cool==0 and self.ngc>0):
+        if (self.cool_redient<self.gc_ap and self.ngc>0):
             if (self.army>0 or self.wanderer>0 or self.mage>0):
                 self.buff_radient = 15.
-                self.radient_cool=120.
+                self.cool_radient=120.
                 self.coda = 0
                 
     def blood(self):
         if (self.available_blood>0 and self.ngc>0): 
             dmg = self.calculate_dmg(110)
             self.available_blood-=1
-            self.blood_cool =15.
+            self.cool_blood =15.
         return dmg
     
     def empyreal(self):
-        if (self.empyreal_cool==0 and self.ngc>0):
+        if (self.cool_empyreal<self.gc_ap and self.ngc>0):
             dmg = self.calculate_dmg(220)
-            if self.wanderer>0:
-                if self.stack_wanderer<3:
-                    self.stack_wanderer+=1
-            elif self.mage>0:
-                if self.available_blood<3:
-                    self.available_blood=+1
-            elif self.army>0:
-                if self.stack_army<4:
-                    self.stack_army+=1
+            self.song_effect()
         return dmg
     
     def pitch(self):
@@ -235,30 +247,34 @@ class bard():
             return dmg
         
     def wanderer_minuet(self):
-        if self.wanderer_cool==0:
+        if self.cool_wanderer<self.gc_ap:
             self.wanderer = 45
             self.stack_coda +=1
-            self.wanderer_cool = 120
+            self.cool_wanderer = 120
             dmg = self.calculate_dmg(100)
             self.start_wanderer = self.elapsed
+            self.calculate_gc(0)
             return dmg
     
     def mage_ballad(self):
-        if self.mage_cool ==0:
+        if self.cool_mage <self.gc_ap:
             self.mage = 30
             self.stack_coda +=1
-            self.mage_cool = 120
+            self.cool_mage = 120
             dmg = self.calculate_dmg(100)
             self.start_mage = self.elapsed
+            self.calculate_gc(0)
             return dmg
     
     def army_paeon(self):
-        if self.army_cool ==0:
+        if self.cool_army <self.gc_ap:
             self.army = 45
             self.stack_coda +=1
-            self.mage_cool = 120
+            self.cool_mage = 120
             dmg = self.calculate_dmg(100)
             self.start_army = self.elapsed
+            self.calculate_gc(0)
+            
             return dmg
     
     def tick(self):
@@ -272,29 +288,35 @@ class bard():
             
     def effect_over_tick(self,elapsed):
         if np.random.random()<0.8:
-            if self.wanderer>0:
-                if self.stack_wanderer<3:
-                    self.stack_wanderer+=1
-            if self.mage>0:
-                self.blood_cool-=7.5
-            if self.army>0:
-                if self.stack_army<4:
-                    self.stack_army+=1
-            if self.soul>100:
-                self.soul+=5
-        
+            self.song_effect()
         
     def damage_over_tick(self):
         if self.storm>0:
-            self.calculate_DOT(25)
+            self.calculate_DOT(25,self.dotbuff_storm_mod, self.dotbuff_storm_dhmod, self.dotbuff_storm_crmod)
         if self.caustic>0:
-            self.calculate_DOT(20)
-    
-    def time_elapse(self,gc):
-        self.elapsed +=gc
+            self.calculate_DOT(20,self.dotbuff_caustic_mod, self.dotbuff_caustic_dhmod, self.dotbuff_caustic_crmod)
         
     def calculate_gc(self,stack_army):
         self.gc_ap = self.gc*(1-stack_army*0.04)
+        
+    def song_effect(self):
+        if self.wanderer>0:
+            if self.stack_wanderer<3:
+                self.stack_wanderer+=1
+                
+        elif self.mage>0:
+            self.cool_blood-=7.5
+
+        elif self.army>0:
+            if self.stack_army<4:
+                self.stack_army+=1
+                self.calculate_gc(self.stack_army)
+        if self.soul>100:
+            self.soul+=5
+    
+    def weapon_skill(self):
+        self.ngc = 2
+        self.elapsed += self.gc_ap
 
 if __name__=='__main__':
     #https://etro.gg/gearset/cec981af-25c7-4ffb-905e-3024411b797a
@@ -305,7 +327,7 @@ if __name__=='__main__':
     spd = 479
     stat = 2575
     wd = 120
-    weapon_delay = 3.2
+    weapon_delay = 3.04
 
     
     main = 390

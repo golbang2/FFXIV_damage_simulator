@@ -64,27 +64,28 @@ class bard():
         self.cool_battle = 0
         
     def check_buff(self):
-        
-        
-    def calculate_dmg(self,potency):
-        buff = 1.
         pcr = self.pcr
         pdh = self.pdh
-        
+        buff = 1.
         if self.wanderer>0:
             pcr +=0.02
         if self.mage>0:
-            buff=buff*1.01
+            buff *=1.01
         if self.army>0:
             pdh +=0.03
         
         if self.buff_battle>0:
-            pdh +=0.2
+            pdh+=0.2
         if self.buff_raging>0:
-            buff = buff*1.15
-        if self.buff_radient>0:
-            buff = buff*(1+self.coda*0.02)
+            buff *=1.15
+        if self.buff.radient>0:
+            buff *=(1+self.radient_coda*2)
+            
+        return buff, pcr, pdh
         
+    def calculate_dmg(self,potency):
+        buff, pcr, pdh = self.check_buff()
+            
         d1 = int(potency * self.atk * self.dt)
         d2 = int(int(d1*int(self.wd))*self.jobmod/100)
         d3 = d2
@@ -98,37 +99,54 @@ class bard():
         
         return int(dmg)
     
-    def calculate_DOT(self,potency,buff,dhmod,crmod):
+    def calculate_DOT(self,potency,buff,pcr,pdh):
         d1 = potency*self.atk*f.f_det(self.dt)/100
         d2 = d1 * self.spd*self.wd*self.jobmod
         d3 = int(f.random_dmg(d2))
         
-        if np.random.random()<self.pcr+crmod:
+        if np.random.random()<pcr:
             d3 = int(d3 * self.dcr)
-        if np.random.random()<self.pdh+dhmod:
+        if np.random.random()<pdh:
             d3 = int(d3*1.25)
         d3 = d3 * buff
         
         return d3
     
     def auto_shot(self):
+        buff, pcr, pdh = self.check_buff()
         d = f.auto_dmg(self.dex,self.weapon, self.weapon_delay)
         d = int(f.random_dmg(d))
-        if np.random.random()<f.pcr:
+        if np.random.random()<pcr:
             d = int(d * self.dcr)
-        if np.random.random()<f.pdh:
+        if np.random.random()<pdh:
             d = int(d*1.25)
+        d = d*buff
         return d
     
     def burst_shot(self):
         dmg = self.calculate_dmg(220)
         if self.straight:
-            dmg = self.calculate_dmg(280)
+            if self.barrage:
+                dmg = self.calculate_dmg(280)+self.calculate_dmg(280)+self.calculate_dmg(280)
+                self.barrage = 0
+            else:
+                dmg = self.calculate_dmg(280)
         self.weapon_skill()
-        if self.barrage:
-            dmg = 3*dmg
-            self.barrage = 0
         return dmg
+    
+    def apex_arrow(self):
+        if self.soul>20:
+            dmg = self.calculate_dmg(self.soul*5)
+            self.weapon_skill()
+            if self.soul>80:
+                self.available_blast=1
+            return dmg
+        
+    def blast_arrow(self):
+        if self.available_blast:
+            dmg = self.calculate_dmg(600)
+            self.weapon_skill()
+            return dmg
     
     def stormbite(self):
         dmg = self.calculate_dmg(100)
@@ -136,16 +154,7 @@ class bard():
         self.weapon_skill()
         self.start_storm = self.elapsed
         
-        self.dotbuff_storm_mod = 1.
-        self.dotbuff_storm_dhmod = 0.
-        self.dotbuff_storm_crmod = 0.
-        
-        if self.buff_battle>0:
-            self.dotbuff_storm_dhmod=0.2
-        if self.buff_raging>0:
-            self.dotbuff_storm_mod*=1.15
-        if self.buff_radient>0:
-            self.dotbuff_storm_mod*=1.06
+        self.dotbuff_storm_mod, self.dotbuff_storm_crmod, self.dotbuff_storm_dhmod = self.check_buff()
         
         return dmg
     
@@ -155,16 +164,7 @@ class bard():
         self.weapon_skill()
         self.start_caustic = self.elapsed
         
-        self.dotbuff_caustic_mod = 1.
-        self.dotbuff_caustic_dhmod = 0.
-        self.dotbuff_caustic_crmod = 0.
-        
-        if self.buff_battle>0:
-            self.dotbuff_caustic_dhmod+=0.2
-        if self.buff_raging>0:
-            self.dotbuff_caustic_mod*=1.15
-        if self.buff_radient>0:
-            self.dotbuff_caustic_mod*=1.06
+        self.dotbuff_caustic_mod, self.dotbuff_caustic_crmod, self.dotbuff_caustic_dhmod = self.check_buff()
         
         return dmg
     
@@ -176,27 +176,8 @@ class bard():
         self.start_caustic = self.elapsed
         self.start_storm = self.elapsed
         
-        self.dotbuff_storm_mod = 1.
-        self.dotbuff_storm_dhmod = 0.
-        self.dotbuff_storm_crmod = 0.
-        
-        if self.buff_battle>0:
-            self.dotbuff_storm_dhmod=0.2
-        if self.buff_raging>0:
-            self.dotbuff_storm_mod*=1.15
-        if self.buff_radient>0:
-            self.dotbuff_storm_mod*=1.06
-        
-        self.dotbuff_caustic_mod = 1.
-        self.dotbuff_caustic_dhmod = 0.
-        self.dotbuff_caustic_crmod = 0.
-        
-        if self.buff_battle>0:
-            self.dotbuff_caustic_dhmod+=0.2
-        if self.buff_raging>0:
-            self.dotbuff_caustic_mod*=1.15
-        if self.buff_radient>0:
-            self.dotbuff_caustic_mod*=1.06
+        self.dotbuff_storm_mod, self.dotbuff_storm_crmod, self.dotbuff_storm_dhmod = self.check_buff()
+        self.dotbuff_caustic_mod, self.dotbuff_caustic_crmod, self.dotbuff_caustic_dhmod = self.check_buff()
         
         return dmg
     
@@ -220,7 +201,8 @@ class bard():
         if (self.cool_redient<self.gc_ap and self.ngc>0):
             if (self.army>0 or self.wanderer>0 or self.mage>0):
                 self.buff_radient = 15.
-                self.cool_radient=120.
+                self.cool_radient = 110.
+                self.radient_coda = self.coda
                 self.coda = 0
                 
     def blood(self):
@@ -329,12 +311,10 @@ if __name__=='__main__':
     wd = 120
     weapon_delay = 3.04
 
-    
     main = 390
     sub = 400
     div = 1900
     
-    pot = 2.2
     pcr,dcr = f.f_crit(cr)
     pdh = f.f_dh(dh)
     gc = f.f_gc(spd)

@@ -126,7 +126,7 @@ class bard():
     def burst_shot(self):
         dmg = self.calculate_dmg(220)
         if self.straight:
-            if self.barrage:
+            if self.barrage>0:
                 dmg = self.calculate_dmg(280)+self.calculate_dmg(280)+self.calculate_dmg(280)
                 self.barrage = 0
             else:
@@ -198,7 +198,7 @@ class bard():
             self.straight = 1
             
     def radient(self):
-        if (self.cool_redient<self.gc_ap and self.ngc>0):
+        if (self.cool_radient<self.gc_ap and self.ngc>0):
             if (self.army>0 or self.wanderer>0 or self.mage>0):
                 self.buff_radient = 15.
                 self.cool_radient = 110.
@@ -236,6 +236,9 @@ class bard():
             dmg = self.calculate_dmg(100)
             self.start_wanderer = self.elapsed
             self.calculate_gc(0)
+            
+            self.mage = 0
+            self.army = 0 
             return dmg
     
     def mage_ballad(self):
@@ -246,6 +249,10 @@ class bard():
             dmg = self.calculate_dmg(100)
             self.start_mage = self.elapsed
             self.calculate_gc(0)
+            
+            self.wanderer = 0
+            self.army = 0
+            
             return dmg
     
     def army_paeon(self):
@@ -257,10 +264,34 @@ class bard():
             self.start_army = self.elapsed
             self.calculate_gc(0)
             
+            self.wanderer = 0
+            self.mage = 0
+            
             return dmg
     
     def tick(self):
         self.elapsed += 0.01
+        
+        if self.wanderer>0:
+            self.wanderer-=0.01
+        elif self.mage>0:
+            self.mage-=0.01
+        elif self.army>0:
+            self.army-=0.01
+            
+        self.dot_caustic-=0.01
+        self.dot_storm-=0.01
+        
+        self.cool_army -= 0.01
+        self.cool_barrage -= 0.01
+        self.cool_battle -= 0.01
+        self.cool_blood -= 0.01
+        self.cool_mage -= 0.01
+        self.cool_radient -= 0.01
+        self.cool_raging -= 0.01
+        self.cool_wanderer -= 0.01
+        self.cool_empyreal -= 0.01
+            
         if self.elapsed%3==0:
             self.effect_over_tick(self.elapsed)
             self.damage_over_tick(self.elapsed)

@@ -124,63 +124,69 @@ class bard():
         return d
     
     def burst_shot(self):
-        dmg = self.calculate_dmg(220)
-        if self.straight:
-            if self.barrage>0:
-                dmg = self.calculate_dmg(280)+self.calculate_dmg(280)+self.calculate_dmg(280)
-                self.barrage = 0
-            else:
-                dmg = self.calculate_dmg(280)
-        self.weapon_skill()
-        return dmg
-    
-    def apex_arrow(self):
-        if self.soul>20:
-            dmg = self.calculate_dmg(self.soul*5)
+        if self.global_cooldown<=0:
+            dmg = self.calculate_dmg(220)
+            if self.straight:
+                if self.barrage>0:
+                    dmg = self.calculate_dmg(280)+self.calculate_dmg(280)+self.calculate_dmg(280)
+                    self.barrage = 0
+                else:
+                    dmg = self.calculate_dmg(280)
             self.weapon_skill()
-            if self.soul>80:
-                self.available_blast=1
             return dmg
+        
+    def apex_arrow(self):
+        if self.global_cooldown<=0:
+            if self.soul>20:
+                dmg = self.calculate_dmg(self.soul*5)
+                self.weapon_skill()
+                if self.soul>80:
+                    self.available_blast=1
+                return dmg
         
     def blast_arrow(self):
-        if self.available_blast:
-            dmg = self.calculate_dmg(600)
-            self.weapon_skill()
-            return dmg
-    
+        if self.global_cooldown<=0:
+            if self.available_blast:
+                dmg = self.calculate_dmg(600)
+                self.weapon_skill()
+                return dmg
+        
     def stormbite(self):
-        dmg = self.calculate_dmg(100)
-        self.dot_storm = 45
-        self.weapon_skill()
-        self.start_storm = self.elapsed
+        if self.global_cooldown<=0:
+            dmg = self.calculate_dmg(100)
+            self.dot_storm = 45
+            self.weapon_skill()
+            self.start_storm = self.elapsed
+            
+            self.dotbuff_storm_mod, self.dotbuff_storm_crmod, self.dotbuff_storm_dhmod = self.check_buff()
+            
+            return dmg
         
-        self.dotbuff_storm_mod, self.dotbuff_storm_crmod, self.dotbuff_storm_dhmod = self.check_buff()
-        
-        return dmg
-    
     def causticbite(self):
-        dmg = self.calculate_dmg(150)
-        self.dot_caustic = 45
-        self.weapon_skill()
-        self.start_caustic = self.elapsed
+        if self.global_cooldown<=0:
+            dmg = self.calculate_dmg(150)
+            self.dot_caustic = 45
+            self.weapon_skill()
+            self.start_caustic = self.elapsed
+            
+            self.dotbuff_caustic_mod, self.dotbuff_caustic_crmod, self.dotbuff_caustic_dhmod = self.check_buff()
+            
+            return dmg
         
-        self.dotbuff_caustic_mod, self.dotbuff_caustic_crmod, self.dotbuff_caustic_dhmod = self.check_buff()
-        
-        return dmg
-    
     def iron_jaws(self):
-        dmg = self.calculate_dmg(100)
-        self.caustic = 45
-        self.storm = 45
-        self.weapon_skill()
-        self.start_caustic = self.elapsed
-        self.start_storm = self.elapsed
+        if self.global_cooldown<=0:
+            dmg = self.calculate_dmg(100)
+            self.caustic = 45
+            self.storm = 45
+            self.weapon_skill()
+            self.start_caustic = self.elapsed
+            self.start_storm = self.elapsed
+            
+            self.dotbuff_storm_mod, self.dotbuff_storm_crmod, self.dotbuff_storm_dhmod = self.check_buff()
+            self.dotbuff_caustic_mod, self.dotbuff_caustic_crmod, self.dotbuff_caustic_dhmod = self.check_buff()
+            
+            return dmg
         
-        self.dotbuff_storm_mod, self.dotbuff_storm_crmod, self.dotbuff_storm_dhmod = self.check_buff()
-        self.dotbuff_caustic_mod, self.dotbuff_caustic_crmod, self.dotbuff_caustic_dhmod = self.check_buff()
-        
-        return dmg
-    
     def raging(self):
         if (self.cool_raging<self.gc_ap and self.ngc>0):
             self.buff_raging=20.
@@ -291,6 +297,13 @@ class bard():
         self.cool_raging -= 0.01
         self.cool_wanderer -= 0.01
         self.cool_empyreal -= 0.01
+        
+        self.buff_battle -= 0.01
+        self.buff_radient -= 0.01
+        self.buff_raging -= 0.01
+        self.buff_barrage -= 0.01
+        
+        self.global_cooldown -= 0.01
             
         if self.elapsed%3==0:
             self.effect_over_tick(self.elapsed)
@@ -324,12 +337,13 @@ class bard():
             if self.stack_army<4:
                 self.stack_army+=1
                 self.calculate_gc(self.stack_army)
+                
         if self.soul>100:
             self.soul+=5
     
     def weapon_skill(self):
         self.ngc = 2
-        self.elapsed += self.gc_ap
+        self.global_cooldown = self.gc_ap
 
 if __name__=='__main__':
     #https://etro.gg/gearset/cec981af-25c7-4ffb-905e-3024411b797a

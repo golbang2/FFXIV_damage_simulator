@@ -54,6 +54,8 @@ class bard():
         self.calculate_gc(0)
         self.initialize_cooldown()
         
+        self.global_cooldown=0
+        
     def initialize_cooldown(self):
         self.cool_wanderer = 0
         self.cool_mage = 0
@@ -62,6 +64,28 @@ class bard():
         self.cool_radient = 0
         self.cool_barrage = 0
         self.cool_battle = 0
+        self.cool_blood = 0 
+        self.cool_empyreal = 0
+    
+    def buff(self):
+        print(self.buff_barrage)
+        print(self.buff_battle)
+        print(self.buff_raging)
+        print(self.buff_radient)
+        print(self.wanderer)
+        print(self.mage)
+        print(self.army)
+        
+    def cooldown(self):
+        print(self.cool_army)
+        print(self.cool_barrage)
+        print(self.cool_battle)
+        print(self.cool_blood)
+        print(self.cool_empyreal)
+        print(self.cool_mage)
+        print(self.cool_radient)
+        print(self.cool_raging)
+        print(self.cool_wanderer)
         
     def check_buff(self):
         pcr = self.pcr
@@ -78,7 +102,7 @@ class bard():
             pdh+=0.2
         if self.buff_raging>0:
             buff *=1.15
-        if self.buff.radient>0:
+        if self.buff_radient>0:
             buff *=(1+self.radient_coda*2)
             
         return buff, pcr, pdh
@@ -92,8 +116,10 @@ class bard():
         
         if np.random.random()<pcr:
             d3 = int(d3 * self.dcr)
+            print('Critical!')
         if np.random.random()<pdh:
             d3 = int(d3*1.25)
+            print('Direct Hit!')
         
         dmg = f.random_dmg(d3)*buff
         
@@ -106,8 +132,10 @@ class bard():
         
         if np.random.random()<pcr:
             d3 = int(d3 * self.dcr)
+            print('Critical!')
         if np.random.random()<pdh:
             d3 = int(d3*1.25)
+            print('Direct Hit!')
         d3 = d3 * buff
         
         return d3
@@ -154,9 +182,9 @@ class bard():
     def stormbite(self):
         if self.global_cooldown<=0:
             dmg = self.calculate_dmg(100)
-            self.dot_storm = 45
+            self.dot_storm = 45.
             self.weapon_skill()
-            self.start_storm = self.elapsed
+            self.dot_storm_tick = 3.
             
             self.dotbuff_storm_mod, self.dotbuff_storm_crmod, self.dotbuff_storm_dhmod = self.check_buff()
             
@@ -165,9 +193,9 @@ class bard():
     def causticbite(self):
         if self.global_cooldown<=0:
             dmg = self.calculate_dmg(150)
-            self.dot_caustic = 45
+            self.dot_caustic = 45.
             self.weapon_skill()
-            self.start_caustic = self.elapsed
+            self.dot_caustic_tick = 3.
             
             self.dotbuff_caustic_mod, self.dotbuff_caustic_crmod, self.dotbuff_caustic_dhmod = self.check_buff()
             
@@ -191,17 +219,20 @@ class bard():
         if (self.cool_raging<self.gc_ap and self.ngc>0):
             self.buff_raging=20.
             self.cool_raging = 120.
+            self.ability()
             
     def battle_voice(self):
         if (self.cool_battle<self.gc_ap and self.ngc>0):
             self.buff_battle = 15
             self.cool_battle = 120
+            self.ability()
         
     def barrage(self):
         if (self.cool_barrage<self.gc_ap and self.ngc>0):
             self.buff_barrage = 10.
             self.cool_barrage = 120.
             self.straight = 1
+            self.ability()
             
     def radient(self):
         if (self.cool_radient<self.gc_ap and self.ngc>0):
@@ -210,18 +241,21 @@ class bard():
                 self.cool_radient = 110.
                 self.radient_coda = self.coda
                 self.coda = 0
+                self.ability()
                 
     def blood(self):
         if (self.available_blood>0 and self.ngc>0): 
             dmg = self.calculate_dmg(110)
             self.available_blood-=1
             self.cool_blood =15.
+            self.ability()
         return dmg
     
     def empyreal(self):
         if (self.cool_empyreal<self.gc_ap and self.ngc>0):
             dmg = self.calculate_dmg(220)
             self.song_effect()
+            self.ability()
         return dmg
     
     def pitch(self):
@@ -232,6 +266,7 @@ class bard():
                 dmg = self.calculate_dmg(220)
             elif self.stack_wanderer==3:
                 dmg = self.calculate_dmg(360)
+            self.ability()
             return dmg
         
     def wanderer_minuet(self):
@@ -245,6 +280,8 @@ class bard():
             
             self.mage = 0
             self.army = 0 
+            
+            self.ability()
             return dmg
     
     def mage_ballad(self):
@@ -259,6 +296,7 @@ class bard():
             self.wanderer = 0
             self.army = 0
             
+            self.ability()
             return dmg
     
     def army_paeon(self):
@@ -273,54 +311,56 @@ class bard():
             self.wanderer = 0
             self.mage = 0
             
+            self.ability()
             return dmg
     
-    def tick(self):
-        self.elapsed += 0.01
-        
-        if self.wanderer>0:
-            self.wanderer-=0.01
-        elif self.mage>0:
-            self.mage-=0.01
-        elif self.army>0:
-            self.army-=0.01
+    def tick(self,iteration=1):
+        for i in range(iteration):
+            self.elapsed += 0.01
             
-        self.dot_caustic-=0.01
-        self.dot_storm-=0.01
-        
-        self.cool_army -= 0.01
-        self.cool_barrage -= 0.01
-        self.cool_battle -= 0.01
-        self.cool_blood -= 0.01
-        self.cool_mage -= 0.01
-        self.cool_radient -= 0.01
-        self.cool_raging -= 0.01
-        self.cool_wanderer -= 0.01
-        self.cool_empyreal -= 0.01
-        
-        self.buff_battle -= 0.01
-        self.buff_radient -= 0.01
-        self.buff_raging -= 0.01
-        self.buff_barrage -= 0.01
-        
-        self.global_cooldown -= 0.01
+            if self.wanderer>0:
+                self.wanderer-=0.01
+            elif self.mage>0:
+                self.mage-=0.01
+            elif self.army>0:
+                self.army-=0.01
+                
+            self.dot_caustic-=0.01
+            self.dot_storm-=0.01
             
-        if self.elapsed%3==0:
-            self.effect_over_tick(self.elapsed)
+            self.cool_army -= 0.01
+            self.cool_barrage -= 0.01
+            self.cool_battle -= 0.01
+            self.cool_blood -= 0.01
+            self.cool_mage -= 0.01
+            self.cool_radient -= 0.01
+            self.cool_raging -= 0.01
+            self.cool_wanderer -= 0.01
+            self.cool_empyreal -= 0.01
+            
+            self.buff_battle -= 0.01
+            self.buff_radient -= 0.01
+            self.buff_raging -= 0.01
+            self.buff_barrage -= 0.01
+            
+            self.global_cooldown -= 0.01
+                
+            if self.elapsed%3==0:
+                self.effect_over_tick(self.elapsed)
+                
+            if self.dot_caustic_tick<0.001:
+                self.calculate_DOT(20,self.dotbuff_caustic_mod, self.dotbuff_caustic_dhmod, self.dotbuff_caustic_crmod)
+            if self.dot_storm_tick<0.001:
+                self.calculate_DOT(25,self.dotbuff_storm_mod, self.dotbuff_storm_dhmod, self.dotbuff_storm_crmod)
             self.damage_over_tick(self.elapsed)
-        
-        if self.elapsed == self.left_time:
-            self.done=1
+            
+            if self.elapsed == self.left_time:
+                self.done=1
             
     def effect_over_tick(self,elapsed):
         if np.random.random()<0.8:
             self.song_effect()
-        
-    def damage_over_tick(self):
-        if self.storm>0:
-            self.calculate_DOT(25,self.dotbuff_storm_mod, self.dotbuff_storm_dhmod, self.dotbuff_storm_crmod)
-        if self.caustic>0:
-            self.calculate_DOT(20,self.dotbuff_caustic_mod, self.dotbuff_caustic_dhmod, self.dotbuff_caustic_crmod)
+            
         
     def calculate_gc(self,stack_army):
         self.gc_ap = self.gc*(1-stack_army*0.04)
@@ -338,12 +378,21 @@ class bard():
                 self.stack_army+=1
                 self.calculate_gc(self.stack_army)
                 
-        if self.soul>100:
+        if self.soul<100:
             self.soul+=5
     
     def weapon_skill(self):
         self.ngc = 2
         self.global_cooldown = self.gc_ap
+        self.last_act = self.elapsed
+        
+    def ability(self):
+        self.ngc -=1
+        self.tick(100)
+        if self.ngc ==0:
+            while self.global_cooldown>0:
+                self.tick()
+        
 
 if __name__=='__main__':
     #https://etro.gg/gearset/cec981af-25c7-4ffb-905e-3024411b797a

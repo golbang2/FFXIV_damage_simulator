@@ -275,7 +275,7 @@ class bard():
             self.stack_coda +=1
             self.cool_wanderer = 120
             dmg = self.calculate_dmg(100)
-            self.start_wanderer = self.elapsed
+            self.tick_song = 3.
             self.calculate_gc(0)
             
             self.mage = 0
@@ -290,7 +290,7 @@ class bard():
             self.stack_coda +=1
             self.cool_mage = 120
             dmg = self.calculate_dmg(100)
-            self.start_mage = self.elapsed
+            self.tick_song = 3.
             self.calculate_gc(0)
             
             self.wanderer = 0
@@ -305,7 +305,7 @@ class bard():
             self.stack_coda +=1
             self.cool_mage = 120
             dmg = self.calculate_dmg(100)
-            self.start_army = self.elapsed
+            self.tick_song = 3.
             self.calculate_gc(0)
             
             self.wanderer = 0
@@ -345,7 +345,7 @@ class bard():
             
             self.global_cooldown -= 0.01
                 
-            if self.elapsed%3==0:
+            if self.tick_song<0.001:
                 self.effect_over_tick(self.elapsed)
                 
             if self.dot_caustic_tick<0.001:

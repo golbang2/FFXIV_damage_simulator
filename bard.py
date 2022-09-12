@@ -160,7 +160,12 @@ class bard():
                     self.barrage = 0
                 else:
                     dmg = self.calculate_dmg(280)
+            else:
+                if np.random.random()<0.8:
+                    self.straight = 1
+            
             self.weapon_skill()
+            
             return dmg
         
     def apex_arrow(self):
@@ -188,6 +193,9 @@ class bard():
             
             self.dotbuff_storm_mod, self.dotbuff_storm_crmod, self.dotbuff_storm_dhmod = self.check_buff()
             
+            if np.random.random()<0.8:
+                self.straight = 1
+            
             return dmg
         
     def causticbite(self):
@@ -198,6 +206,9 @@ class bard():
             self.dot_caustic_tick = 3.
             
             self.dotbuff_caustic_mod, self.dotbuff_caustic_crmod, self.dotbuff_caustic_dhmod = self.check_buff()
+            
+            if np.random.random()<0.8:
+                self.straight = 1
             
             return dmg
         
@@ -212,6 +223,9 @@ class bard():
             
             self.dotbuff_storm_mod, self.dotbuff_storm_crmod, self.dotbuff_storm_dhmod = self.check_buff()
             self.dotbuff_caustic_mod, self.dotbuff_caustic_crmod, self.dotbuff_caustic_dhmod = self.check_buff()
+            
+            if np.random.random()<0.8:
+                self.straight = 1
             
             return dmg
         
@@ -347,14 +361,16 @@ class bard():
                 
             if self.tick_song<0.001:
                 self.effect_over_tick(self.elapsed)
+                self.tick_song = 3.
                 
             if self.dot_caustic_tick<0.001:
                 self.calculate_DOT(20,self.dotbuff_caustic_mod, self.dotbuff_caustic_dhmod, self.dotbuff_caustic_crmod)
+                self.dot_caustic_tick = 3.
             if self.dot_storm_tick<0.001:
                 self.calculate_DOT(25,self.dotbuff_storm_mod, self.dotbuff_storm_dhmod, self.dotbuff_storm_crmod)
-            self.damage_over_tick(self.elapsed)
+                self.dot_storm_tick = 3.    
             
-            if self.elapsed == self.left_time:
+            if self.elapsed > self.left_time:
                 self.done=1
             
     def effect_over_tick(self,elapsed):

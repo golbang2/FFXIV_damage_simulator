@@ -7,13 +7,16 @@ Created on Mon Sep 12 16:26:50 2022
 
 import bard
 
-def opening(bard_class):
-    bard_class.stormbite()
-    bard_class.wanderer_minuet()
-    bard_class.raging()
-    bard_class.causticbite()
-    bard_class.empyreal()
-    bard_class.blood()
-    bard_class.burst_shot()
-    bard_class.radient()
-    bard_class.battle_voice()
+def opening(class_bard):
+    class_bard.stormbite()
+    class_bard.wanderer_minuet()
+    class_bard.raging()
+    class_bard.causticbite()
+    class_bard.empyreal()
+    class_bard.blood()
+    class_bard.burst_shot()
+    class_bard.radient()
+    class_bard.battle_voice()
+    class_bard.burst_shot()
+    if class_bard.straight:
+        class_bard.sidewinder()

@@ -20,3 +20,18 @@ def opening(class_bard):
     class_bard.burst_shot()
     if class_bard.straight:
         class_bard.sidewinder()
+        class_bard.burst_shot()
+        class_bard.barrage()
+        class_bard.burst_shot()
+        class_bard.burst_shot()
+        class_bard.empyreal()
+        class_bard.iron_jaws()
+    else:
+        class_bard.barrage()
+        class_bard.burst_show()
+        class_bard.sidewinder()
+        class_bard.burst_show()
+        class_bard.burst_show()
+        class_bard.burst_show()
+        class_bard.empyreal()
+        class_bard.iron_jaws()

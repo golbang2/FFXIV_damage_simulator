@@ -359,6 +359,10 @@ class bard():
             
             self.global_cooldown -= 0.01
                 
+            if (self.cool_blood <0 and self.available_blood<3):
+                self.available_blood+=1
+                self.cool_blood = 15
+            
             if self.tick_song<0.001:
                 self.effect_over_tick(self.elapsed)
                 self.tick_song = 3.

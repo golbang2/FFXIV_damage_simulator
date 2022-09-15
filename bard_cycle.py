@@ -35,3 +35,8 @@ def opening(class_bard):
         class_bard.burst_show()
         class_bard.empyreal()
         class_bard.iron_jaws()
+
+def cycle_in_minuet(class_bard):
+    if class_bard.stack_wanderer==3:
+        class_bard.pitch()
+    elif 

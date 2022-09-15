@@ -8,7 +8,7 @@ import ffxiv_calculate_damage as f
 import numpy as np
 
 class bard():
-    def __init__(self,gc,cr,dh,dt,stat,wd,spd,period):
+    def __init__(self,gc,cr,dh,dt,stat,wd,spd,period, print_log =0):
         self.gc = gc
         self.pcr,self.dcr = f.f_crit(cr)
         self.pdh = f.f_dh(dh)
@@ -55,6 +55,8 @@ class bard():
         self.initialize_cooldown()
         
         self.global_cooldown=0
+        
+        self.print_log = print_log
         
     def initialize_cooldown(self):
         self.cool_wanderer = 0
@@ -107,61 +109,78 @@ class bard():
             
         return buff, pcr, pdh
         
-    def calculate_dmg(self,potency):
+    def calculate_dmg(self,potency,skill_name):
         buff, pcr, pdh = self.check_buff()
             
         d1 = int(potency * self.atk * self.dt)
         d2 = int(int(d1*int(self.wd))*self.jobmod/100)
         d3 = d2
         
+        is_crit, is_dh = False, False
+        
         if np.random.random()<pcr:
             d3 = int(d3 * self.dcr)
-            print('Critical!')
+            is_crit = 'Critical'
         if np.random.random()<pdh:
             d3 = int(d3*1.25)
-            print('Direct Hit!')
+            is_dh = 'DirectHit'
         
         dmg = f.random_dmg(d3)*buff
         
+        if self.print_log:
+            print(skill_name, dmg, 'Crit:', is_crit, 'DirectHit', is_dh, 'time: ', self.elapsed)
+            
+        
         return int(dmg)
     
-    def calculate_DOT(self,potency,buff,pcr,pdh):
+    def calculate_DOT(self,potency,buff,pcr,pdh,skill_name):
         d1 = potency*self.atk*f.f_det(self.dt)/100
         d2 = d1 * self.spd*self.wd*self.jobmod
         d3 = int(f.random_dmg(d2))
         
+        
+        is_crit, is_dh = False, False
         if np.random.random()<pcr:
             d3 = int(d3 * self.dcr)
-            print('Critical!')
+            is_crit = True
         if np.random.random()<pdh:
             d3 = int(d3*1.25)
-            print('Direct Hit!')
-        d3 = d3 * buff
+            is_dh = True
+        dmg = d3 * buff
         
-        return d3
+        if self.print_log:
+            print('DOT_',skill_name, dmg, 'Crit:', is_crit, 'DirectHit', is_dh, 'time: ', self.elapsed)
+        
+        return dmg
     
     def auto_shot(self):
         buff, pcr, pdh = self.check_buff()
         d = f.auto_dmg(self.dex,self.weapon, self.weapon_delay)
         d = int(f.random_dmg(d))
+        is_crit, is_dh = False, False
         if np.random.random()<pcr:
             d = int(d * self.dcr)
+            is_crit = True
         if np.random.random()<pdh:
             d = int(d*1.25)
-        d = d*buff
-        return d
+            is_dh = True
+        dmg = d*buff
+        
+        if self.print_log:
+            print('AutoShot', dmg, 'Crit:', is_crit, 'DirectHit', is_dh, 'time: ', self.elapsed)
+        return dmg
     
     def burst_shot(self):
         if self.global_cooldown<=0:
-            dmg = self.calculate_dmg(220)
+            dmg = self.calculate_dmg(220, 'Burst Shot')
             if self.straight:
                 if self.barrage>0:
-                    dmg = self.calculate_dmg(280)+self.calculate_dmg(280)+self.calculate_dmg(280)
+                    dmg = self.calculate_dmg(280,'Refulgent Arrow')+self.calculate_dmg(280,'Refulgent Arrow')+self.calculate_dmg(280,'Refulgent Arrow')
                     self.barrage = 0
                 else:
-                    dmg = self.calculate_dmg(280)
+                    dmg = self.calculate_dmg(280,'Refulgent Arrow')
             else:
-                if np.random.random()<0.8:
+                if np.random.random()<0.35:
                     self.straight = 1
             
             self.weapon_skill()
@@ -171,7 +190,7 @@ class bard():
     def apex_arrow(self):
         if self.global_cooldown<=0:
             if self.soul>20:
-                dmg = self.calculate_dmg(self.soul*5)
+                dmg = self.calculate_dmg(self.soul*5,'Apex Arrow')
                 self.weapon_skill()
                 if self.soul>80:
                     self.available_blast=1
@@ -180,13 +199,13 @@ class bard():
     def blast_arrow(self):
         if self.global_cooldown<=0:
             if self.available_blast:
-                dmg = self.calculate_dmg(600)
+                dmg = self.calculate_dmg(600,'Blast Arrow')
                 self.weapon_skill()
                 return dmg
         
     def stormbite(self):
         if self.global_cooldown<=0:
-            dmg = self.calculate_dmg(100)
+            dmg = self.calculate_dmg(100,'Stormbite')
             self.dot_storm = 45.
             self.weapon_skill()
             self.dot_storm_tick = 3.
@@ -200,7 +219,7 @@ class bard():
         
     def causticbite(self):
         if self.global_cooldown<=0:
-            dmg = self.calculate_dmg(150)
+            dmg = self.calculate_dmg(150,'Causticbite')
             self.dot_caustic = 45.
             self.weapon_skill()
             self.dot_caustic_tick = 3.
@@ -214,7 +233,7 @@ class bard():
         
     def iron_jaws(self):
         if self.global_cooldown<=0:
-            dmg = self.calculate_dmg(100)
+            dmg = self.calculate_dmg(100,'Iron Jaws')
             self.caustic = 45
             self.storm = 45
             self.weapon_skill()
@@ -259,7 +278,7 @@ class bard():
                 
     def blood(self):
         if (self.available_blood>0 and self.ngc>0): 
-            dmg = self.calculate_dmg(110)
+            dmg = self.calculate_dmg(110,'Bloodletter')
             self.available_blood-=1
             self.cool_blood =15.
             self.ability()
@@ -267,7 +286,7 @@ class bard():
     
     def empyreal(self):
         if (self.cool_empyreal<self.gc_ap and self.ngc>0):
-            dmg = self.calculate_dmg(220)
+            dmg = self.calculate_dmg(220,'Empyreal Arrow')
             self.song_effect()
             self.ability()
         return dmg
@@ -275,11 +294,11 @@ class bard():
     def pitch(self):
         if (self.wanderer>0 and self.stack_wanderer>0):
             if self.stack_wanderer==1:
-                dmg = self.calculate_dmg(100)
+                dmg = self.calculate_dmg(100,'Pitch Perfect')
             elif self.stack_wanderer==2:
-                dmg = self.calculate_dmg(220)
+                dmg = self.calculate_dmg(220,'Pitch Perfect')
             elif self.stack_wanderer==3:
-                dmg = self.calculate_dmg(360)
+                dmg = self.calculate_dmg(360,'Pitch Perfect')
             self.ability()
             return dmg
         
@@ -288,7 +307,7 @@ class bard():
             self.wanderer = 45
             self.stack_coda +=1
             self.cool_wanderer = 120
-            dmg = self.calculate_dmg(100)
+            dmg = self.calculate_dmg(100,"Wanderer Minuet")
             self.tick_song = 3.
             self.calculate_gc(0)
             
@@ -303,7 +322,7 @@ class bard():
             self.mage = 30
             self.stack_coda +=1
             self.cool_mage = 120
-            dmg = self.calculate_dmg(100)
+            dmg = self.calculate_dmg(100,"Mage Ballad")
             self.tick_song = 3.
             self.calculate_gc(0)
             
@@ -318,7 +337,7 @@ class bard():
             self.army = 45
             self.stack_coda +=1
             self.cool_mage = 120
-            dmg = self.calculate_dmg(100)
+            dmg = self.calculate_dmg(100,"Army Paeon")
             self.tick_song = 3.
             self.calculate_gc(0)
             
@@ -368,10 +387,10 @@ class bard():
                 self.tick_song = 3.
                 
             if self.dot_caustic_tick<0.001:
-                self.calculate_DOT(20,self.dotbuff_caustic_mod, self.dotbuff_caustic_dhmod, self.dotbuff_caustic_crmod)
+                self.calculate_DOT(20,self.dotbuff_caustic_mod, self.dotbuff_caustic_dhmod, self.dotbuff_caustic_crmod,"Caustic")
                 self.dot_caustic_tick = 3.
             if self.dot_storm_tick<0.001:
-                self.calculate_DOT(25,self.dotbuff_storm_mod, self.dotbuff_storm_dhmod, self.dotbuff_storm_crmod)
+                self.calculate_DOT(25,self.dotbuff_storm_mod, self.dotbuff_storm_dhmod, self.dotbuff_storm_crmod,"Storm")
                 self.dot_storm_tick = 3.    
             
             if self.elapsed > self.left_time:

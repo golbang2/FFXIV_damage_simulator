@@ -68,6 +68,7 @@ class bard():
         self.cool_battle = 0
         self.cool_blood = 0 
         self.cool_empyreal = 0
+        self.cool_sidewinder = 0
     
     def buff(self):
         print(self.buff_barrage)
@@ -254,7 +255,7 @@ class bard():
             self.cool_raging = 120.
             self.ability()
             
-    def battle_voice(self):
+    def battle(self):
         if (self.cool_battle<self.gc_ap and self.ngc>0):
             self.buff_battle = 15
             self.cool_battle = 120
@@ -288,6 +289,12 @@ class bard():
         if (self.cool_empyreal<self.gc_ap and self.ngc>0):
             dmg = self.calculate_dmg(220,'Empyreal Arrow')
             self.song_effect()
+            self.ability()
+        return dmg
+    
+    def sidewinder(self):
+        if (self.cool_sidewinder<self.gc_ap and self.ngc>0):
+            dmg = self.calculate_dmg(300,'Sidewinder')
             self.ability()
         return dmg
     
@@ -370,6 +377,7 @@ class bard():
             self.cool_raging -= 0.01
             self.cool_wanderer -= 0.01
             self.cool_empyreal -= 0.01
+            self.cool_sidewinder -= 0.01
             
             self.buff_battle -= 0.01
             self.buff_radient -= 0.01

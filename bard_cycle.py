@@ -43,19 +43,41 @@ def burst(bard):
     gc_in_minuet(bard)
     ngc_in_minuet(bard)
     ngc_in_minuet(bard)
-    gc_in_minuet(bard,apex=1)
+    gc_in_minuet(bard)
     bard.radient()
     bard.battle()
+    gc_in_minuet(bard)
 
-def gc_in_minuet(bard,apex=0):
+def gc_in_minuet(bard):
     if (bard.dot_caustic<3 or bard.dot_storm<3):
         bard.iron_jaws()
     elif bard.available_blast:
         bard.blast_arrow()
-    elif (bard.buff_raging >0 and bard.buff_radient>0 and bard.buff_battle>0 and bard.soul>80 and apex==1):
+    elif (bard.buff_raging >0 and bard.buff_radient>0 and bard.buff_battle>0 and bard.soul>80):
         bard.apex_arrow()
 
 def ngc_in_minuet(bard):
+    if bard.stack_wanderer==3:
+        bard.pitch()
+    elif bard.cool_sidewinder<0:
+        bard.sidewinder()
+    elif bard.cool_empyreal<0:
+        bard.empyreal()
+    elif bard.available_blood>0:
+        bard.blood()
+    
+    if bard.wanderer<3:
+        bard.mage_ballad()
+        
+def gc_in_mage(bard):
+    if (bard.dot_caustic<3 or bard.dot_storm<3):
+        bard.iron_jaws()
+    elif bard.available_blast:
+        bard.blast_arrow()
+    elif (bard.buff_raging >0 and bard.buff_radient>0 and bard.buff_battle>0 and bard.soul>80):
+        bard.apex_arrow()
+        
+def ngc_in_mage(bard):
     if bard.stack_wanderer==3:
         bard.pitch()
     elif bard.cool_sidewinder<0:

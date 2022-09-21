@@ -447,7 +447,8 @@ class bard():
     def effect_over_tick(self,elapsed):
         if np.random.random()<0.8:
             self.song_effect()
-            
+            if self.print_log:
+                print('Got Repertoire')
         
     def calculate_gc(self,stack_army):
         self.gc_ap = self.gc*(1-stack_army*0.04)

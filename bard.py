@@ -108,7 +108,7 @@ class bard():
         if self.buff_raging>0:
             buff *=1.15
         if self.buff_radient>0:
-            buff *=(1+self.radient_coda*2)
+            buff *=(1+self.radient_coda*0.02)
             
         return buff, pcr, pdh
         
@@ -174,26 +174,29 @@ class bard():
         return dmg
     
     def burst_shot(self):
-        if self.global_cooldown<=0:
-            dmg = self.calculate_dmg(220, 'Burst Shot')
+        if self.global_cooldown<0.001:
             if self.available_straight:
-                if self.barrage>0:
+                if self.buff_barrage>0:
+                    
+                    
+                    
                     dmg = self.calculate_dmg(280,'Refulgent Arrow')+self.calculate_dmg(280,'Refulgent Arrow')+self.calculate_dmg(280,'Refulgent Arrow')
-                    self.barrage = 0
+                    self.buff_barrage = 0
                 else:
                     dmg = self.calculate_dmg(280,'Refulgent Arrow')
             else:
+                dmg = self.calculate_dmg(220, 'Burst Shot')
                 if np.random.random()<0.35:
                     self.available_straight = 1
                     if self.print_log:
-                        print('buff_straight')
+                        print('Refulgent Arrow Available')
             
             self.weapon_skill()
             
             return dmg
         
     def apex_arrow(self):
-        if self.global_cooldown<=0:
+        if self.global_cooldown<0.001:
             if self.soul>20:
                 dmg = self.calculate_dmg(self.soul*5,'Apex Arrow')
                 self.weapon_skill()
@@ -202,14 +205,14 @@ class bard():
                 return dmg
         
     def blast_arrow(self):
-        if self.global_cooldown<=0:
+        if self.global_cooldown<0.001:
             if self.available_blast:
                 dmg = self.calculate_dmg(600,'Blast Arrow')
                 self.weapon_skill()
                 return dmg
         
     def stormbite(self):
-        if self.global_cooldown<=0:
+        if self.global_cooldown<0.001:
             dmg = self.calculate_dmg(100,'Stormbite')
             self.dot_storm = 45.
             
@@ -220,13 +223,13 @@ class bard():
             if np.random.random()<0.35:
                 self.available_straight = 1
                 if self.print_log:
-                    print('buff_straight')
+                    print('Refulgent Arrow Available')
         
             self.weapon_skill()
             return dmg
         
     def causticbite(self):
-        if self.global_cooldown<=0:
+        if self.global_cooldown<0.001:
             dmg = self.calculate_dmg(150,'Causticbite')
             self.dot_caustic = 45.
             self.dot_caustic_tick = 3.
@@ -235,13 +238,13 @@ class bard():
             if np.random.random()<0.35:
                 self.available_straight = 1
                 if self.print_log:
-                    print('buff_straight')
+                    print('Refulgent Arrow Available')
         
             self.weapon_skill()
             return dmg
         
     def iron_jaws(self):
-        if self.global_cooldown<=0:
+        if self.global_cooldown<0.001:
             dmg = self.calculate_dmg(100,'Iron Jaws')
             self.caustic = 45
             self.storm = 45
@@ -255,7 +258,7 @@ class bard():
             if np.random.random()<0.35:
                 self.available_straight = 1
                 if self.print_log:
-                    print('buff_straight')
+                    print('Refulgent Arrow Available')
             
             self.weapon_skill()
             return dmg
@@ -293,7 +296,7 @@ class bard():
             if (self.army>0 or self.wanderer>0 or self.mage>0):
                 self.buff_radient = 15.
                 self.cool_radient = 110.
-                self.radient_coda = self.coda
+                self.radient_coda = self.stack_coda
                 self.stack_coda = 0
                 self.ability()
                 
@@ -415,7 +418,7 @@ class bard():
             
             self.global_cooldown -= self.time_per_tick
                 
-            if (self.cool_blood <0 and self.available_blood<3):
+            if (self.cool_blood <0.001 and self.available_blood<3):
                 self.available_blood+=1
                 self.cool_blood = 15
                 
@@ -447,8 +450,7 @@ class bard():
     def effect_over_tick(self,elapsed):
         if np.random.random()<0.8:
             self.song_effect()
-            if self.print_log:
-                print('Got Repertoire')
+
         
     def calculate_gc(self,stack_army):
         self.gc_ap = self.gc*(1-stack_army*0.04)
@@ -468,6 +470,14 @@ class bard():
                 
         if self.soul<100:
             self.soul+=5
+            
+        if self.print_log:
+            if self.wanderer>0:
+                print('Wanderer Repertoire:', self.stack_wanderer, 'time:',self.elapsed)
+            if self.mage>0:
+                print('Mage Repertoire Blood available:', self.blood, 'Blood cooldown', self.cool_blood,'time:',self.elapsed)
+            if self.army>0:
+                print('Army Repertoire:',self.stack_army, 'Global cooldwn:', self.gc_ap,'time:',self.elapsed)
     
     def weapon_skill(self):
         self.ngc = 2

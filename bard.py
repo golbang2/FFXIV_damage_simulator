@@ -6,6 +6,8 @@ Created on Wed Aug  3 14:10:48 2022
 """
 import ffxiv_calculate_damage as f
 import numpy as np
+import pandas as pd
+from collections import deque
 
 class bard():
     def __init__(self,gc,cr,dh,dt,stat,wd,spd,period, print_log =0):
@@ -59,6 +61,7 @@ class bard():
         
         self.print_log = print_log
         self.time_per_tick = 0.01
+        self.event_log = deque()
         
     def initialize_cooldown(self):
         self.cool_wanderer = 0
@@ -82,15 +85,16 @@ class bard():
         print(self.army)
         
     def cooldown(self):
-        print(self.cool_army)
-        print(self.cool_barrage)
-        print(self.cool_battle)
-        print(self.cool_blood)
-        print(self.cool_empyreal)
-        print(self.cool_mage)
-        print(self.cool_radient)
-        print(self.cool_raging)
-        print(self.cool_wanderer)
+        print('Army paeon',self.cool_army)
+        print('Barrage',self.cool_barrage)
+        print('Battle voice',self.cool_battle)
+        print('Bloodletter',self.cool_blood,', stack: ',self.available_blood)
+        print('Empyreal Arrow',self.cool_empyreal)
+        print('Mage ballad',self.cool_mage)
+        print('Radient Finale',self.cool_radient)
+        print('Raging strikes', self.cool_raging)
+        print('Wanderer minuet', self.cool_wanderer)
+        print('Sidewinder', self.cool_sidewinder)
         
     def check_buff(self):
         pcr = self.pcr
@@ -117,22 +121,20 @@ class bard():
             
         d1 = int(potency * self.atk * self.dt)
         d2 = int(int(d1*int(self.wd))*self.jobmod/100)
-        d3 = d2
-        
         is_crit, is_dh = False, False
-        
         if np.random.random()<pcr:
-            d3 = int(d3 * self.dcr)
+            d2 = int(d2 * self.dcr)
             is_crit = True
         if np.random.random()<pdh:
-            d3 = int(d3*1.25)
+            d2 = int(d2*1.25)
             is_dh = True
         
-        dmg = f.random_dmg(d3)*buff
+        dmg = f.random_dmg(d2)*buff
         
         if self.print_log:
             print(skill_name, int(dmg), 'Crit:', is_crit, 'DirectHit:', is_dh, 'time: ', round(self.elapsed,2))
             
+        self.event_log.append((skill_name, 'Direct', int(dmg), is_crit,is_dh, round(self.elapsed,3)))
         
         return int(dmg)
     
@@ -140,7 +142,6 @@ class bard():
         d1 = potency*self.atk*f.f_det(self.dt)/100
         d2 = d1 * self.spd*self.wd*self.jobmod
         d3 = int(f.random_dmg(d2))
-        
         
         is_crit, is_dh = False, False
         if np.random.random()<pcr:
@@ -152,7 +153,9 @@ class bard():
         dmg = d3 * buff
         
         if self.print_log:
-            print('DOT_',skill_name, int(dmg), 'Crit:', is_crit, 'DirectHit:', is_dh, 'time: ', round(self.elapsed,2))
+            print('DOT',skill_name,'DOT', int(dmg), 'Crit:', is_crit, 'DirectHit:', is_dh, 'time: ', round(self.elapsed,2))
+        
+        self.event_log.append((skill_name, int(dmg), is_crit,is_dh, round(self.elapsed,3)))
         
         return dmg
     
@@ -171,15 +174,15 @@ class bard():
         
         if self.print_log:
             print('AutoShot', int(dmg), 'Crit:', is_crit, 'DirectHit:', is_dh, 'time: ', round(self.elapsed,2))
+        
+        self.event_log.append(('Autoshot','Auto', int(dmg), is_crit,is_dh, round(self.elapsed,3)))
+        
         return dmg
     
     def burst_shot(self):
         if self.global_cooldown<0.001:
             if self.available_straight:
                 if self.buff_barrage>0:
-                    
-                    
-                    
                     dmg = self.calculate_dmg(280,'Refulgent Arrow')+self.calculate_dmg(280,'Refulgent Arrow')+self.calculate_dmg(280,'Refulgent Arrow')
                     self.buff_barrage = 0
                 else:
@@ -271,6 +274,7 @@ class bard():
             
             if self.print_log:
                 print('Raging Strikes time:', round(self.elapsed,2))
+            self.event_log.append(('Raging Strikes','Buff', np.nan, np.nan,np.nan, round(self.elapsed,3)))
             
     def battle(self):
         if (self.cool_battle<0 and self.ngc>0):
@@ -280,6 +284,8 @@ class bard():
             
             if self.print_log:
                 print('Battle Voice time:', round(self.elapsed,2))
+            
+            self.event_log.append(('Battle Voice','Buff', np.nan, np.nan,np.nan, round(self.elapsed,3)))
         
     def barrage(self):
         if (self.cool_barrage<0 and self.ngc>0):
@@ -290,6 +296,8 @@ class bard():
             
             if self.print_log:
                 print('Barrage time:', round(self.elapsed,2))
+            
+            self.event_log.append(('Barrage','Buff', np.nan, np.nan,np.nan, round(self.elapsed,3)))
             
     def radient(self):
         if (self.cool_radient<0 and self.ngc>0):
@@ -302,6 +310,8 @@ class bard():
                 
                 if self.print_log:
                     print('Radient Finale time:', round(self.elapsed,2))
+                
+                self.event_log.append(('Radient Finale','Buff', np.nan, np.nan,np.nan, round(self.elapsed,3)))
                 
     def blood(self):
         if (self.available_blood>0 and self.ngc>0): 
@@ -385,7 +395,6 @@ class bard():
     
     def tick(self,iteration=1):
         for i in range(iteration):
-            
             self.elapsed += self.time_per_tick
             
             if self.wanderer>0:
@@ -491,6 +500,9 @@ class bard():
             while self.global_cooldown>0:
                 self.tick()
         
+    def extract_log(self):
+        df = pd.DataFrame(self.event_log)
+        return df
 
 if __name__=='__main__':
     #https://etro.gg/gearset/cec981af-25c7-4ffb-905e-3024411b797a

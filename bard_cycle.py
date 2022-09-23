@@ -28,11 +28,11 @@ def opening(agent):
         agent.iron_jaws()
     else:
         agent.barrage()
-        agent.burst_show()
+        agent.burst_shot()
         agent.sidewinder()
-        agent.burst_show()
-        agent.burst_show()
-        agent.burst_show()
+        agent.burst_shot()
+        agent.burst_shot()
+        agent.burst_shot()
         agent.empyreal()
         agent.iron_jaws()
 

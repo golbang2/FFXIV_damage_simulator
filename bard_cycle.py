@@ -18,7 +18,7 @@ def opening(agent):
     agent.radient()
     agent.battle()
     agent.burst_shot()
-    if agent.straight:
+    if agent.available_straight:
         agent.sidewinder()
         agent.burst_shot()
         agent.barrage()
@@ -93,6 +93,11 @@ def ngc_in_mage(agent):
         agent.empyreal()
     elif agent.available_blood>0:
         agent.blood()
+        
+    
+    if agent.wanderer<15:
+        agent.mage_ballad()
+        
 
 def gc_in_army(agent):
     if (agent.dot_caustic<3 or agent.dot_storm<3):

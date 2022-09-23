@@ -363,7 +363,7 @@ class bard():
     
     def mage_ballad(self):
         if self.cool_mage <0:
-            self.mage = 30
+            self.mage = 45
             self.stack_coda +=1
             self.cool_mage = 120
 

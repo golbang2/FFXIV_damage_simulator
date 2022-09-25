@@ -4,7 +4,7 @@ Created on Wed Aug  3 14:10:48 2022
 
 @author: atgol
 """
-import ffxiv_calculate_damage as f
+import functions as f
 import numpy as np
 import pandas as pd
 from collections import deque
@@ -184,97 +184,110 @@ class bard():
         return dmg
     
     def burst_shot(self):
-        if self.global_cooldown<0.001:
-            if self.available_straight:
-                self.available_straight = 0
-                if self.buff_barrage>0:
-                    dmg = self.calculate_dmg(280,'Refulgent Arrow')+self.calculate_dmg(280,'Refulgent Arrow')+self.calculate_dmg(280,'Refulgent Arrow')
-                    self.buff_barrage = 0
-                else:
-                    dmg = self.calculate_dmg(280,'Refulgent Arrow')
-                    
+        if self.global_cooldown>0:
+            while self.global_cooldown>0:
+                self.tick()
+            
+        if self.available_straight:
+            self.available_straight = 0
+            if self.buff_barrage>0:
+                dmg = self.calculate_dmg(280,'Refulgent Arrow')+self.calculate_dmg(280,'Refulgent Arrow')+self.calculate_dmg(280,'Refulgent Arrow')
+                self.buff_barrage = 0
             else:
-                dmg = self.calculate_dmg(220, 'Burst Shot')
-                if np.random.random()<0.35:
-                    self.available_straight = 1
-                    if self.print_log:
-                        print('Refulgent Arrow Available')
-            
-            self.weapon_skill()
-            
-            return dmg
+                dmg = self.calculate_dmg(280,'Refulgent Arrow')
+                
+        else:
+            dmg = self.calculate_dmg(220, 'Burst Shot')
+            if np.random.random()<0.35:
+                self.available_straight = 1
+                if self.print_log:
+                    print('Refulgent Arrow Available')
+        
+        self.weapon_skill()
+        
+        return dmg
         
     def apex_arrow(self):
-        if self.global_cooldown<0.001:
-            if self.soul>20:
-                dmg = self.calculate_dmg(self.soul*5,'Apex Arrow')
-                self.weapon_skill()
-                if self.soul>80:
-                    self.available_blast=1
-                return dmg
+        if self.global_cooldown>0:
+            while self.global_cooldown>0:
+                self.tick()
+        if self.soul>20:
+            dmg = self.calculate_dmg(self.soul*5,'Apex Arrow')
+            self.weapon_skill()
+            if self.soul>80:
+                self.available_blast=1
+            return dmg
         
     def blast_arrow(self):
-        if self.global_cooldown<0.001:
-            if self.available_blast:
-                dmg = self.calculate_dmg(600,'Blast Arrow')
-                self.weapon_skill()
-                return dmg
+        if self.global_cooldown>0:
+            while self.global_cooldown>0:
+                self.tick()
+        if self.available_blast:
+            dmg = self.calculate_dmg(600,'Blast Arrow')
+            self.weapon_skill()
+            return dmg
         
     def stormbite(self):
-        if self.global_cooldown<0.001:
-            dmg = self.calculate_dmg(100,'Stormbite')
-            self.dot_storm = 45* self.time_multiply
-            
-            self.tick_dot_storm = 3* self.time_multiply
-            
-            self.dotbuff_storm_mod, self.dotbuff_storm_crmod, self.dotbuff_storm_dhmod = self.check_buff()
-            
-            if np.random.random()<0.35:
-                self.available_straight = 1
-                if self.print_log:
-                    print('Refulgent Arrow Available')
+        if self.global_cooldown>0:
+            while self.global_cooldown>0:
+                self.tick()
+        dmg = self.calculate_dmg(100,'Stormbite')
+        self.dot_storm = 45* self.time_multiply
         
-            self.weapon_skill()
-            return dmg
+        self.tick_dot_storm = 3* self.time_multiply
+        
+        self.dotbuff_storm_mod, self.dotbuff_storm_crmod, self.dotbuff_storm_dhmod = self.check_buff()
+        
+        if np.random.random()<0.35:
+            self.available_straight = 1
+            if self.print_log:
+                print('Refulgent Arrow Available')
+    
+        self.weapon_skill()
+        return dmg
         
     def causticbite(self):
-        if self.global_cooldown<0.001:
-            dmg = self.calculate_dmg(150,'Causticbite')
-            self.dot_caustic = 45 * self.time_multiply
-            self.tick_dot_caustic = 3 * self.time_multiply
-            self.dotbuff_caustic_mod, self.dotbuff_caustic_crmod, self.dotbuff_caustic_dhmod = self.check_buff()
-            
-            if np.random.random()<0.35:
-                self.available_straight = 1
-                if self.print_log:
-                    print('Refulgent Arrow Available')
+        if self.global_cooldown>0:
+            while self.global_cooldown>0:
+                self.tick()
+        dmg = self.calculate_dmg(150,'Causticbite')
+        self.dot_caustic = 45 * self.time_multiply
+        self.tick_dot_caustic = 3 * self.time_multiply
+        self.dotbuff_caustic_mod, self.dotbuff_caustic_crmod, self.dotbuff_caustic_dhmod = self.check_buff()
         
-            self.weapon_skill()
-            return dmg
+        if np.random.random()<0.35:
+            self.available_straight = 1
+            if self.print_log:
+                print('Refulgent Arrow Available')
+    
+        self.weapon_skill()
+        return dmg
         
     def iron_jaws(self):
-        if self.global_cooldown<0.001:
-            dmg = self.calculate_dmg(100,'Iron Jaws')
-            self.caustic = 45
-            self.storm = 45
-            
-            self.start_caustic = self.elapsed
-            self.start_storm = self.elapsed
-            
-            self.dotbuff_storm_mod, self.dotbuff_storm_crmod, self.dotbuff_storm_dhmod = self.check_buff()
-            self.dotbuff_caustic_mod, self.dotbuff_caustic_crmod, self.dotbuff_caustic_dhmod = self.check_buff()
-            
-            if np.random.random()<0.35:
-                self.available_straight = 1
-                if self.print_log:
-                    print('Refulgent Arrow Available')
-            
-            self.weapon_skill()
-            return dmg
+        if self.global_cooldown>0:
+            while self.global_cooldown>0:
+                self.tick()
+        dmg = self.calculate_dmg(100,'Iron Jaws')
+        self.caustic = 45* self.time_multiply
+        self.storm = 45* self.time_multiply
+        
+        self.start_caustic = self.elapsed
+        self.start_storm = self.elapsed
+        
+        self.dotbuff_storm_mod, self.dotbuff_storm_crmod, self.dotbuff_storm_dhmod = self.check_buff()
+        self.dotbuff_caustic_mod, self.dotbuff_caustic_crmod, self.dotbuff_caustic_dhmod = self.check_buff()
+        
+        if np.random.random()<0.35:
+            self.available_straight = 1
+            if self.print_log:
+                print('Refulgent Arrow Available')
+        
+        self.weapon_skill()
+        return dmg
         
     def raging(self):
         if (self.cool_raging<0 and self.ngc>0):
-            self.buff_raging=20.
+            self.buff_raging=20* self.time_multiply
             self.cool_raging = 120 * self.time_multiply
             
             if self.print_log:
@@ -284,7 +297,7 @@ class bard():
             
     def battle(self):
         if (self.cool_battle<0 and self.ngc>0):
-            self.buff_battle = 15
+            self.buff_battle = 15* self.time_multiply
             self.cool_battle = 120 * self.time_multiply
             
             if self.print_log:
@@ -295,7 +308,7 @@ class bard():
         
     def barrage(self):
         if (self.cool_barrage<0 and self.ngc>0):
-            self.buff_barrage = 10.
+            self.buff_barrage = 10* self.time_multiply
             self.cool_barrage = 120 * self.time_multiply
             self.available_straight = 1
             
@@ -308,8 +321,8 @@ class bard():
     def radient(self):
         if (self.cool_radient<0 and self.ngc>0):
             if (self.buff_army>0 or self.buff_wanderer>0 or self.buff_mage>0):
-                self.buff_radient = 15.
-                self.cool_radient = 110.
+                self.buff_radient = 15* self.time_multiply
+                self.cool_radient = 110* self.time_multiply
                 self.radient_coda = self.stack_coda
                 self.stack_coda = 0
                 
@@ -332,7 +345,7 @@ class bard():
             self.song_effect()
             self.cool_empyreal = 15* self.time_multiply
             self.ability()
-        return dmg
+            return dmg
     
     def sidewinder(self):
         if (self.cool_sidewinder<0 and self.ngc>0):

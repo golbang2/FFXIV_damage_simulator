@@ -5,7 +5,8 @@ Created on Mon Sep 12 16:26:50 2022
 @author: Taeyoon
 """
 
-import bard as job
+import bard
+import functions as f
 
 def opening(agent):
     agent.stormbite()
@@ -104,3 +105,23 @@ def gc_in_army(agent):
         agent.iron_jaws()
     else:
         agent.burst_shot()
+        
+if __name__=='__main__':
+    period = 300
+    cr = 2229
+    dt = 1381
+    dh = 1662
+    spd = 479
+    stat = 2575
+    wd = 120
+    weapon_delay = 3.04
+
+    main = 390
+    sub = 400
+    div = 1900
+    
+    pcr,dcr = f.f_crit(cr)
+    pdh = f.f_dh(dh)
+    gc = f.f_gc(spd)
+    
+    agent = bard(gc,cr,dh,dt,stat,wd,spd,period,print_log = 1)

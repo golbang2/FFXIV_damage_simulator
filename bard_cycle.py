@@ -95,7 +95,6 @@ def ngc_in_mage(agent):
     elif agent.available_blood>0:
         agent.blood()
         
-    
     if agent.wanderer<15:
         agent.mage_ballad()
         
@@ -122,6 +121,5 @@ if __name__=='__main__':
     
     pcr,dcr = f.f_crit(cr)
     pdh = f.f_dh(dh)
-    gc = f.f_gc(spd)
     
-    agent = bard(gc,cr,dh,dt,stat,wd,spd,period,print_log = 1)
+    agent = bard.bard(cr,dh,dt,stat,wd,spd,period,print_log = 1)

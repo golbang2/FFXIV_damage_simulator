@@ -42,24 +42,3 @@ def auto_dmg(stat,weapon,delay,main=390,job=115):
 
 def f_gc(spd):
     return int(2500*(1000+math.ceil(130*(400-spd)/1900))/10000)/100
-
-period = 300
-#cr = 1945
-cr = 2017
-#dh = 1594
-dt = 1097
-#dt = 1146
-dh = 1811
-spd = 593
-stat = 2347
-wd = 115
-weapon_delay = 3.2
-
-main = 390
-sub = 400
-div = 1900
-
-pot = 2.2
-pcr,dcr = f_crit(cr)
-pdh = f_dh(dh)
-gc = f_gc(spd)

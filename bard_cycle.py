@@ -50,7 +50,7 @@ def burst(agent):
     gc_in_minuet(agent)
 
 def gc_in_minuet(agent):
-    if (agent.dot_caustic<3 or agent.dot_storm<3):
+    if (agent.dot_caustic<3 * agent.time_multiply or agent.dot_storm<3 * agent.time_multiply):
         agent.iron_jaws()
     elif agent.available_blast:
         agent.blast_arrow()
@@ -63,25 +63,24 @@ def gc_in_minuet(agent):
 def ngc_in_minuet(agent):
     if agent.stack_wanderer==3:
         agent.pitch()
-    elif agent.cool_sidewinder<0:
+    elif agent.cool_sidewinder<=0:
         agent.sidewinder()
-    elif agent.cool_empyreal<0:
+    elif agent.cool_empyreal<=0:
         agent.empyreal()
     elif agent.available_blood>0:
         agent.blood()
     
-    if agent.wanderer<3:
+    if agent.buff_wanderer<3*agent.time_multiply:
+        agent.pitch()
         agent.mage_ballad()
         
 def gc_in_mage(agent):
-    if (agent.dot_caustic<3 or agent.dot_storm<3):
+    if (agent.dot_caustic < 3 * agent.time_multiply or agent.dot_storm < 3 * agent.time_multiply):
         agent.iron_jaws()
-    elif agent.soul>80:
+    elif (agent.soul>80 and agent.buff_mage>):
         agent.apex_arrow()
     elif agent.available_blast:
         agent.blast_arrow()
-    elif (agent.buff_raging >0 and agent.buff_radient>0 and agent.buff_battle>0 and agent.soul>80):
-        agent.apex_arrow()
     else:
         agent.burst_shot()
         
@@ -95,8 +94,8 @@ def ngc_in_mage(agent):
     elif agent.available_blood>0:
         agent.blood()
         
-    if agent.wanderer<15:
-        agent.mage_ballad()
+    if agent.wanderer<15 * agent.time_multiply:
+        agent.army_paeon()
         
 
 def gc_in_army(agent):
@@ -104,6 +103,14 @@ def gc_in_army(agent):
         agent.iron_jaws()
     else:
         agent.burst_shot()
+        
+def ngc_in_army(agent):
+    if (agent.available_blood>2 and agent.cool_blood<agent.gc_ap):
+        agent.blood()
+    if agent.cool_empyreal<=0:
+        agent.empyreal()
+    if agent.buff_army<3 * agent.time_multiply:
+        agent.wanderer_minuet()
         
 if __name__=='__main__':
     period = 300

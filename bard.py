@@ -295,6 +295,7 @@ class bard():
                 self.tick()
         if self.soul>20:
             dmg = self.calculate_dmg(self.soul*5,'Apex Arrow')
+            self.soul = 0
             self.weapon_skill()
             if self.soul>80:
                 self.available_blast=1

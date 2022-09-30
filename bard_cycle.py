@@ -71,13 +71,17 @@ def ngc_in_minuet(agent):
         agent.blood()
     
     if agent.buff_wanderer<3*agent.time_multiply:
-        agent.pitch()
-        agent.mage_ballad()
+        if agent.stack_wanderer>0:
+            agent.pitch()
+        else:
+            agent.mage_ballad()
         
 def gc_in_mage(agent):
     if (agent.dot_caustic < 3 * agent.time_multiply or agent.dot_storm < 3 * agent.time_multiply):
         agent.iron_jaws()
-    elif (agent.soul>80 and agent.buff_mage>):
+    elif (agent.soul==100 and agent.buff_mage > 15 * agent.time_multiply):
+        agent.apex_arrow()
+    elif (agent.soul>80 and agent.buff_mage > 18 * agent.time_multiply and agent.buff_mage<21 * agent.time_multiply):
         agent.apex_arrow()
     elif agent.available_blast:
         agent.blast_arrow()
@@ -94,7 +98,7 @@ def ngc_in_mage(agent):
     elif agent.available_blood>0:
         agent.blood()
         
-    if agent.wanderer<15 * agent.time_multiply:
+    if agent.buff_wanderer < 15 * agent.time_multiply:
         agent.army_paeon()
         
 

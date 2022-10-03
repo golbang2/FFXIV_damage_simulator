@@ -369,7 +369,7 @@ class bard():
         return dmg
         
     def raging(self):
-        if (self.cool_raging<0 and self.ngc>0):
+        if (self.cool_raging<=0 and self.ngc>0):
             self.buff_raging=20* self.time_multiply
             self.cool_raging = 120 * self.time_multiply
             
@@ -379,7 +379,7 @@ class bard():
             self.ability()
             
     def battle(self):
-        if (self.cool_battle<0 and self.ngc>0):
+        if (self.cool_battle<=0 and self.ngc>0):
             self.buff_battle = 15* self.time_multiply
             self.cool_battle = 120 * self.time_multiply
             
@@ -390,7 +390,7 @@ class bard():
             self.ability()
         
     def barrage(self):
-        if (self.cool_barrage<0 and self.ngc>0):
+        if (self.cool_barrage<=0 and self.ngc>0):
             self.buff_barrage = 10* self.time_multiply
             self.cool_barrage = 120 * self.time_multiply
             self.available_straight = 1
@@ -402,7 +402,7 @@ class bard():
             self.ability()
             
     def radient(self):
-        if (self.cool_radient<0 and self.ngc>0):
+        if (self.cool_radient<=0 and self.ngc>0):
             if (self.buff_army>0 or self.buff_wanderer>0 or self.buff_mage>0):
                 self.buff_radient = 15* self.time_multiply
                 self.cool_radient = 110* self.time_multiply
@@ -423,7 +423,7 @@ class bard():
         return dmg
     
     def empyreal(self):
-        if (self.cool_empyreal<0 and self.ngc>0):
+        if (self.cool_empyreal<=0 and self.ngc>0):
             dmg = self.calculate_dmg(220,'Empyreal Arrow')
             self.song_effect()
             self.cool_empyreal = 15* self.time_multiply
@@ -431,7 +431,7 @@ class bard():
             return dmg
     
     def sidewinder(self):
-        if (self.cool_sidewinder<0 and self.ngc>0):
+        if (self.cool_sidewinder<=0 and self.ngc>0):
             dmg = self.calculate_dmg(300,'Sidewinder')
             self.cool_sidewinder = 60* self.time_multiply
             self.ability()
@@ -449,8 +449,8 @@ class bard():
             return dmg
         
     def wanderer_minuet(self):
-        if self.cool_wanderer<0:
-            self.buff_wanderer = 45
+        if self.cool_wanderer<=0:
+            self.buff_wanderer = 45 * self.time_multiply
             self.stack_coda +=1
             self.cool_wanderer = 120* self.time_multiply
             self.tick_song = 3 * self.time_multiply
@@ -464,8 +464,8 @@ class bard():
             return dmg
     
     def mage_ballad(self):
-        if self.cool_mage <0:
-            self.buff_mage = 45
+        if self.cool_mage <=0:
+            self.buff_mage = 45* self.time_multiply
             self.stack_coda +=1
             self.cool_mage = 120* self.time_multiply
 
@@ -480,8 +480,8 @@ class bard():
             return dmg
     
     def army_paeon(self):
-        if self.cool_army <0:
-            self.buff_army = 45
+        if self.cool_army <=0:
+            self.buff_army = 45* self.time_multiply
             self.stack_coda +=1
             self.cool_mage = 120* self.time_multiply
             
@@ -511,16 +511,26 @@ class bard():
             self.dot_caustic-=self.time_per_tick
             self.dot_storm-=self.time_per_tick
             
-            self.cool_army -= self.time_per_tick
-            self.cool_barrage -= self.time_per_tick
-            self.cool_battle -= self.time_per_tick
-            self.cool_blood -= self.time_per_tick
-            self.cool_mage -= self.time_per_tick
-            self.cool_radient -= self.time_per_tick
-            self.cool_raging -= self.time_per_tick
-            self.cool_wanderer -= self.time_per_tick
-            self.cool_empyreal -= self.time_per_tick
-            self.cool_sidewinder -= self.time_per_tick
+            if self.cool_army>0:
+                self.cool_army -= self.time_per_tick
+            if self.cool_barrage>0:
+                self.cool_barrage -= self.time_per_tick
+            if self.cool_battle>0:
+                self.cool_battle -= self.time_per_tick
+            if self.cool_blood>0:
+                self.cool_blood -= self.time_per_tick
+            if self.cool_mage>0:
+                self.cool_mage -= self.time_per_tick
+            if self.cool_radient>0:
+                self.cool_radient -= self.time_per_tick
+            if self.cool_raging>0:
+                self.cool_raging -= self.time_per_tick
+            if self.cool_wanderer>0:
+                self.cool_wanderer -= self.time_per_tick
+            if self.cool_empyreal>0:
+                self.cool_empyreal -= self.time_per_tick
+            if self.cool_sidewinder>0:
+                self.cool_sidewinder -= self.time_per_tick
             
             self.buff_battle -= self.time_per_tick
             self.buff_radient -= self.time_per_tick
@@ -529,7 +539,7 @@ class bard():
             
             self.global_cooldown -= self.time_per_tick
                 
-            if (self.cool_blood <0.001 and self.available_blood<3):
+            if (self.cool_blood <=0 and self.available_blood<3):
                 self.available_blood+=1
                 self.cool_blood = 15
                 
@@ -541,17 +551,17 @@ class bard():
                 
             if self.dot_caustic>0:
                 self.tick_dot_caustic -= self.time_per_tick
-                if self.tick_dot_caustic<0.001:
+                if self.tick_dot_caustic<=0:
                     self.calculate_DOT(20,self.dotbuff_caustic_mod, self.dotbuff_caustic_dhmod, self.dotbuff_caustic_crmod,"Caustic")
                     self.tick_dot_caustic = 3* self.time_multiply
                     
             if self.dot_storm>0:
                 self.tick_dot_storm -= self.time_per_tick
-                if self.tick_dot_storm<0.001:
+                if self.tick_dot_storm<=0:
                     self.calculate_DOT(25,self.dotbuff_storm_mod, self.dotbuff_storm_dhmod, self.dotbuff_storm_crmod,"Storm")
                     self.tick_dot_storm = 3* self.time_multiply   
             
-            if self.tick_autoshot<0.001:
+            if self.tick_autoshot<=0:
                 self.tick_autoshot = 3* self.time_multiply
                 self.auto_shot()
                 
@@ -559,7 +569,8 @@ class bard():
                 self.done=1
             
     def effect_over_tick(self,elapsed):
-        if np.random.random()<0.8:
+        randomnumber = np.random.random()
+        if randomnumber<0.8:
             self.song_effect()
 
         

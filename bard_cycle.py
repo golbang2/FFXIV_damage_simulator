@@ -19,8 +19,10 @@ def opening(agent):
     agent.radient()
     agent.battle()
     agent.burst_shot()
+    
     if agent.available_straight:
         agent.sidewinder()
+        ngc_in_minuet(agent)
         agent.burst_shot()
         agent.barrage()
         agent.burst_shot()
@@ -101,7 +103,6 @@ def ngc_in_mage(agent):
     if agent.buff_wanderer < 15 * agent.time_multiply:
         agent.army_paeon()
         
-
 def gc_in_army(agent):
     if (agent.dot_caustic<3 or agent.dot_storm<3):
         agent.iron_jaws()

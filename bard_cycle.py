@@ -19,7 +19,6 @@ def opening(agent):
     agent.radient()
     agent.battle()
     agent.burst_shot()
-    
     if agent.available_straight:
         agent.sidewinder()
         ngc_in_minuet(agent)
@@ -31,11 +30,19 @@ def opening(agent):
         agent.iron_jaws()
     else:
         agent.barrage()
+        ngc_in_minuet(agent)
         agent.burst_shot()
         agent.sidewinder()
+        ngc_in_minuet(agent)
         agent.burst_shot()
+        ngc_in_minuet(agent)
+        ngc_in_minuet(agent)
         agent.burst_shot()
+        ngc_in_minuet(agent)
+        ngc_in_minuet(agent)
         agent.burst_shot()
+        ngc_in_minuet(agent)
+        ngc_in_minuet(agent)
         agent.empyreal()
         agent.iron_jaws()
 
@@ -60,7 +67,6 @@ def gc_in_minuet(agent):
         agent.apex_arrow()
     else:
         agent.burst_shot()
-        
 
 def ngc_in_minuet(agent):
     if agent.stack_wanderer==3:
@@ -72,7 +78,7 @@ def ngc_in_minuet(agent):
     elif agent.available_blood>0:
         agent.blood()
     
-    if agent.buff_wanderer<3*agent.time_multiply:
+    if agent.buff_wanderer< 3 *agent.time_multiply:
         if agent.stack_wanderer>0:
             agent.pitch()
         else:
@@ -91,11 +97,9 @@ def gc_in_mage(agent):
         agent.burst_shot()
         
 def ngc_in_mage(agent):
-    if agent.stack_wanderer==3:
-        agent.pitch()
-    elif agent.cool_sidewinder<0:
+    if agent.cool_sidewinder<=0:
         agent.sidewinder()
-    elif agent.cool_empyreal<0:
+    elif agent.cool_empyreal<=0:
         agent.empyreal()
     elif agent.available_blood>0:
         agent.blood()
@@ -104,7 +108,7 @@ def ngc_in_mage(agent):
         agent.army_paeon()
         
 def gc_in_army(agent):
-    if (agent.dot_caustic<3 or agent.dot_storm<3):
+    if (agent.dot_caustic< 3 * agent.time_multiply or agent.dot_storm< 3 *agent.time_multiply):
         agent.iron_jaws()
     else:
         agent.burst_shot()

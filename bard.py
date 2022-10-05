@@ -615,7 +615,7 @@ class bard():
                 
     def waiting(self,cooldown):
         left_time = self.global_cooldown - self.tick_per_act * self.ngc
-        if cooldown < left_time:
+        if (cooldown>0 and cooldown<left_time):
             self.tick(cooldown)
         
     def extract_log(self):

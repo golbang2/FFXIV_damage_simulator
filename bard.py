@@ -415,6 +415,9 @@ class bard():
                 self.ability()
                 
     def blood(self):
+        if (self.available_blood ==0 and self.cool_blood>0):
+            self.waiting(agent.cool_blood)
+        
         if (self.available_blood>0 and self.ngc>0): 
             dmg = self.calculate_dmg(110,'Bloodletter')
             self.available_blood-=1
@@ -423,6 +426,9 @@ class bard():
         return dmg
     
     def empyreal(self):
+        if self.cool_empyreal>0:
+            self.waiting(agent.cool_empyreal)
+        
         if (self.cool_empyreal<=0 and self.ngc>0):
             dmg = self.calculate_dmg(220,'Empyreal Arrow')
             self.song_effect()
@@ -431,6 +437,9 @@ class bard():
             return dmg
     
     def sidewinder(self):
+        if self.cool_sidewinder>0:
+            self.waiting(agent.cool_sidewinder)
+        
         if (self.cool_sidewinder<=0 and self.ngc>0):
             dmg = self.calculate_dmg(300,'Sidewinder')
             self.cool_sidewinder = 60* self.time_multiply
@@ -449,6 +458,9 @@ class bard():
             return dmg
         
     def wanderer_minuet(self):
+        if self.cool_wanderer>0:
+            self.waiting(agent.cool_wanderer)
+        
         if self.cool_wanderer<=0:
             self.buff_wanderer = 45 * self.time_multiply
             self.stack_coda +=1
@@ -464,6 +476,9 @@ class bard():
             return dmg
     
     def mage_ballad(self):
+        if self.cool_mage>0:
+            self.waiting(agent.cool_mage)
+        
         if self.cool_mage <=0:
             self.buff_mage = 45* self.time_multiply
             self.stack_coda +=1
@@ -480,10 +495,13 @@ class bard():
             return dmg
     
     def army_paeon(self):
+        if self.cool_army>0:
+            self.waiting(agent.cool_army)
+        
         if self.cool_army <=0:
             self.buff_army = 45* self.time_multiply
             self.stack_coda +=1
-            self.cool_mage = 120* self.time_multiply
+            self.cool_army = 120* self.time_multiply
             
             self.tick_song = 3* self.time_multiply
             self.calculate_gc(0)

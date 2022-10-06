@@ -72,13 +72,10 @@ def ngc_in_minuet(agent):
     if agent.stack_wanderer==3:
         agent.pitch()
     elif agent.cool_sidewinder<=0:
-        agent.waiting(agent.cool_sidewinder)
         agent.sidewinder()
     elif agent.cool_empyreal<=0:
-        agent.waiting(agent.cool_empyreal)
         agent.empyreal()
     elif agent.available_blood>0:
-        agent.waiting(agent.cool_blood)
         agent.blood()
     
     if agent.buff_wanderer< 3 *agent.time_multiply:

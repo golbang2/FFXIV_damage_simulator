@@ -371,6 +371,10 @@ class dancer(character):
                     
                 if self.elapsed > self.left_time:
                     self.done=1
+                    
+class machinist(character):
+    
+                    
         
 if __name__=='__main__':
     #https://etro.gg/gearset/cec981af-25c7-4ffb-905e-3024411b797a

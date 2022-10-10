@@ -7,6 +7,7 @@ Created on Mon Sep 12 16:26:50 2022
 
 import bard
 import functions as f
+import time
 
 def opening(agent):
     agent.stormbite()
@@ -21,7 +22,7 @@ def opening(agent):
     agent.burst_shot()
     if agent.available_straight:
         agent.sidewinder()
-        ngc_in_minuet(agent)
+        ngc_in_wanderer(agent)
         agent.burst_shot()
         agent.barrage()
         agent.burst_shot()
@@ -30,35 +31,38 @@ def opening(agent):
         agent.iron_jaws()
     else:
         agent.barrage()
-        ngc_in_minuet(agent)
+        ngc_in_wanderer(agent)
         agent.burst_shot()
         agent.sidewinder()
-        ngc_in_minuet(agent)
+        ngc_in_wanderer(agent)
         agent.burst_shot()
-        ngc_in_minuet(agent)
-        ngc_in_minuet(agent)
+        ngc_in_wanderer(agent)
+        ngc_in_wanderer(agent)
         agent.burst_shot()
-        ngc_in_minuet(agent)
-        ngc_in_minuet(agent)
+        ngc_in_wanderer(agent)
+        ngc_in_wanderer(agent)
         agent.burst_shot()
-        ngc_in_minuet(agent)
-        ngc_in_minuet(agent)
+        ngc_in_wanderer(agent)
+        ngc_in_wanderer(agent)
         agent.empyreal()
         agent.iron_jaws()
 
 def burst(agent):
-    gc_in_minuet(agent)
+    gc_in_wanderer(agent)
     agent.wanderer_minuet()
     agent.raging()
-    gc_in_minuet(agent)
-    ngc_in_minuet(agent)
-    ngc_in_minuet(agent)
-    gc_in_minuet(agent)
+    gc_in_wanderer(agent)
+    ngc_in_wanderer(agent)
+    ngc_in_wanderer(agent)
+    gc_in_wanderer(agent)
     agent.radient()
     agent.battle()
-    gc_in_minuet(agent)
+    if agent.dot_caustic<38*agent.time_multiply:
+        agent.iron_jaws()
+    else:
+        gc_in_wanderer(agent)
 
-def gc_in_minuet(agent):
+def gc_in_wanderer(agent):
     if (agent.dot_caustic<3 * agent.time_multiply or agent.dot_storm<3 * agent.time_multiply):
         agent.iron_jaws()
     elif agent.available_blast:
@@ -68,7 +72,7 @@ def gc_in_minuet(agent):
     else:
         agent.burst_shot()
 
-def ngc_in_minuet(agent):
+def ngc_in_wanderer(agent):
     if agent.stack_wanderer==3:
         agent.pitch()
     elif agent.cool_sidewinder<=0:
@@ -104,7 +108,7 @@ def ngc_in_mage(agent):
     elif agent.available_blood>0:
         agent.blood()
         
-    if agent.buff_wanderer < 15 * agent.time_multiply:
+    if agent.buff_mage < 15 * agent.time_multiply:
         agent.army_paeon()
         
 def gc_in_army(agent):
@@ -120,6 +124,23 @@ def ngc_in_army(agent):
         agent.empyreal()
     if agent.buff_army<3 * agent.time_multiply:
         agent.wanderer_minuet()
+        
+def GC(agent):
+    if agent.buff_wanderer>0:
+        gc_in_wanderer(agent)
+    elif agent.buff_mage>0:
+        gc_in_mage(agent)
+    elif agent.buff_army>0:
+        gc_in_army(agent)
+        
+def NGC(agent):
+    if agent.buff_wanderer>0:
+        ngc_in_wanderer(agent)
+    elif agent.buff_mage>0:
+        ngc_in_mage(agent)
+    elif agent.buff_army>0:
+        ngc_in_army(agent)
+
         
 if __name__=='__main__':
     period = 300
@@ -138,4 +159,18 @@ if __name__=='__main__':
     pcr,dcr = f.f_crit(cr)
     pdh = f.f_dh(dh)
     
-    agent = bard.bard(cr,dh,dt,stat,wd,spd,period,print_log = 1)
+    agent = bard.Bard(cr,dh,dt,stat,wd,spd,period,print_log = 1)
+    
+    opening(agent)
+    
+    while not agent.done:
+        if agent.cool_wanderer<=0:
+            burst(agent)
+        
+        time.sleep(0.5)
+        GC(agent)
+        time.sleep(0.5)
+        NGC(agent)
+        time.sleep(0.5)
+        NGC(agent)
+        

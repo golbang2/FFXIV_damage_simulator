@@ -9,87 +9,7 @@ import numpy as np
 import pandas as pd
 from collections import deque
 
-class character():
-    def __init__(self,cr,dh,dt,stat,wd,spd,period,print_log = 0):
-        self.pcr,self.dcr = f.f_crit(cr)
-        self.pdh = f.f_dh(dh)
-        self.dt = f.f_det(dt)
-        self.dex = stat
-        self.weapon = wd
-        self.atk = f.f_atk(stat)
-        self.wd = f.f_wd(wd)
-        self.spd = f.f_spd(spd)
-        self.jobmod = 1.2*1.1
-        self.weapon_delay = 3.04
-        self.left_time = period
-        self.elapsed = 0
-        self.tick_autoshot = 0
-
-    def calculate_dmg(self,potency,skill_name):
-        buff, pcr, pdh = self.check_buff()
-            
-        d1 = int(potency * self.atk * self.dt)
-        d2 = int(int(d1*int(self.wd))*self.jobmod/100)
-        is_crit, is_dh = False, False
-        if np.random.random()<pcr:
-            d2 = int(d2 * self.dcr)
-            is_crit = True
-        if np.random.random()<pdh:
-            d2 = int(d2*1.25)
-            is_dh = True
-        
-        dmg = f.random_dmg(d2)*buff
-        
-        if self.print_log:
-            print(skill_name, int(dmg), 'Crit:', is_crit, 'DirectHit:', is_dh, 'time: ', round(self.elapsed/self.time_multiply,2))
-            
-        self.event_log.append((skill_name, 'Direct', int(dmg), is_crit,is_dh, round(self.elapsed/self.time_multiply,3)))
-        
-        return int(dmg)
-    
-    def calculate_DOT(self,potency,buff,pcr,pdh,skill_name):
-        d1 = potency*self.atk*f.f_det(self.dt)/100
-        d2 = d1 * self.spd*self.wd*self.jobmod
-        d3 = int(f.random_dmg(d2))
-        
-        is_crit, is_dh = False, False
-        if np.random.random()<pcr:
-            d3 = int(d3 * self.dcr)
-            is_crit = True
-        if np.random.random()<pdh:
-            d3 = int(d3*1.25)
-            is_dh = True
-        dmg = d3 * buff
-        
-        if self.print_log:
-            print('DOT',skill_name,'DOT', int(dmg), 'Crit:', is_crit, 'DirectHit:', is_dh, 'time: ', round(self.elapsed/self.time_multiply,2))
-        
-        self.event_log.append((skill_name, 'DOT',int(dmg), is_crit,is_dh, round(self.elapsed/self.time_multiply,3)))
-        
-        return dmg
-    
-    def auto_shot(self):
-        buff, pcr, pdh = self.check_buff()
-        d = f.auto_dmg(self.dex,self.weapon, self.weapon_delay)
-        d = int(f.random_dmg(d))
-        is_crit, is_dh = False, False
-        if np.random.random()<pcr:
-            d = int(d * self.dcr)
-            is_crit = True
-        if np.random.random()<pdh:
-            d = int(d*1.25)
-            is_dh = True
-        dmg = d*buff
-        
-        if self.print_log:
-            print('AutoShot', int(dmg), 'Crit:', is_crit, 'DirectHit:', is_dh, 'time: ', round(self.elapsed/self.time_multiply,2))
-        
-        self.event_log.append(('Autoshot','Auto', int(dmg), is_crit,is_dh, round(self.elapsed/self.time_multiply,3)))
-        
-        return dmg
-
-
-class bard():
+class Bard():
     def __init__(self,cr,dh,dt,stat,wd,spd,period, print_log =0):
         #super().__init__(cr,dh,dt,stat,wd,spd,period,print_log)
         
@@ -149,6 +69,8 @@ class bard():
         self.gc = f.f_gc(spd)*self.time_multiply
         self.calculate_gc(0)
         
+        self.done =0
+        
     def initialize_cooldown(self):
         self.cool_wanderer = 0
         self.cool_mage = 0
@@ -171,17 +93,16 @@ class bard():
         print('army paeon:',self.buff_army)
         
     def cooldown(self):
-        print('Raging strikes', self.cool_raging)
-        print('Radient Finale',self.cool_radient)
-        print('Battle voice',self.cool_battle)
-        print('Barrage',self.cool_barrage)
-        print('Sidewinder', self.cool_sidewinder)
-        print('Bloodletter',self.cool_blood,', stack: ',self.available_blood)
-        print('Empyreal Arrow',self.cool_empyreal)
-        print('Wanderer minuet', self.cool_wanderer)
-        print('Mage ballad',self.cool_mage)
-        print('Army paeon',self.cool_army)
-        
+        print('Raging strikes', self.cool_raging/100)
+        print('Radient Finale',self.cool_radient/100)
+        print('Battle voice',self.cool_battle/100)
+        print('Barrage',self.cool_barrage/100)
+        print('Sidewinder', self.cool_sidewinder/100)
+        print('Bloodletter',self.cool_blood/100,', stack: ',self.available_blood)
+        print('Empyreal Arrow',self.cool_empyreal/100)
+        print('Wanderer minuet', self.cool_wanderer/100)
+        print('Mage ballad',self.cool_mage/100)
+        print('Army paeon',self.cool_army/100)
         
     def check_buff(self):
         pcr = self.pcr
@@ -199,9 +120,7 @@ class bard():
         if self.buff_raging>0:
             buff *=115 /100
         if self.buff_radient>0:
-            buff *=(100+self.radient_coda*2) / 100
-            
-            
+            buff *=(100+self.radient_coda*2) * 0.01
         return buff, pcr, pdh
         
     def calculate_dmg(self,potency,skill_name):
@@ -591,7 +510,7 @@ class bard():
                 self.tick_autoshot = 3* self.time_multiply
                 self.auto_shot()
                 
-            if self.elapsed > self.left_time:
+            if self.elapsed > self.left_time*self.time_multiply:
                 self.done=1
             
     def effect_over_tick(self,elapsed):
@@ -666,4 +585,4 @@ if __name__=='__main__':
     pcr,dcr = f.f_crit(cr)
     pdh = f.f_dh(dh)
     
-    agent = bard(cr,dh,dt,dex,wd,spd,period,print_log = 1)
+    agent = Bard(cr,dh,dt,dex,wd,spd,period,print_log = 1)

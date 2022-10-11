@@ -118,7 +118,7 @@ class character():
         df = pd.DataFrame(self.event_log,columns=['Skill', 'Type','Damage','Crit','Dhit','Time'])
         return df
     
-class dancer(character):
+class Dancer(Character):
     def __init__(self,cr,dh,dt,stat,wd,spd,period, print_log =0, opening = -15):
         super().__init__(cr,dh,dt,stat,wd,spd,period,print_log)
         
@@ -372,7 +372,7 @@ class dancer(character):
                 if self.elapsed > self.left_time:
                     self.done=1
                     
-class machinist(character):
+class Machinist(Character):
     
                     
         

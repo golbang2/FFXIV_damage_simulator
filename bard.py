@@ -27,35 +27,9 @@ class Bard():
         self.elapsed = 0
         self.tick_autoshot = 0
         
-        self.buff_barrage = 0
-        self.buff_battle = 0
-        self.buff_raging = 0
-        self.buff_radient = 0
-        
-        self.buff_army = 0
-        self.buff_mage = 0
-        self.buff_wanderer = 0
-        
-        self.dot_storm = 0
-        self.dotbuff_storm_mod = 1.
-        self.dotbuff_storm_dhmod = 0.
-        self.dotbuff_storm_crmod = 0.
-        
-        self.dot_caustic = 0
-        self.dotbuff_caustic_mod = 1.
-        self.dotbuff_caustic_dhmod = 0.
-        self.dotbuff_caustic_crmod = 0.
-        
-        self.available_straight = 0
-        self.available_blast = 0
-        self.available_blood = 3
-        
-        self.stack_coda = 0
-        self.stack_wanderer = 0
-        self.soul = 0
-        self.stack_army = 0
-        
-        self.initialize_cooldown()
+        self.initialize_buff()
+        self.initialize_dot()
+        self.initialize_skill()
         
         self.global_cooldown=0
         
@@ -71,7 +45,7 @@ class Bard():
         
         self.done =0
         
-    def initialize_cooldown(self):
+    def initialize_skill(self):
         self.cool_wanderer = 0
         self.cool_mage = 0
         self.cool_army = 0
@@ -82,27 +56,58 @@ class Bard():
         self.cool_blood = 0 
         self.cool_empyreal = 0
         self.cool_sidewinder = 0
+        
+        self.available_straight = 0
+        self.available_blast = 0
+        self.available_blood = 3
+        
+        self.stack_coda = 0
+        self.stack_wanderer = 0
+        self.soul = 0
+        self.stack_army = 0
+    
+    def initialize_buff(self):
+        self.buff_barrage = 0
+        self.buff_battle = 0
+        self.buff_raging = 0
+        self.buff_radient = 0
+        
+        self.buff_army = 0
+        self.buff_mage = 0
+        self.buff_wanderer = 0
+        
+    def initialize_dot(self):
+        self.dot_storm = 0
+        self.dotbuff_storm_mod = 1.
+        self.dotbuff_storm_dhmod = 0.
+        self.dotbuff_storm_crmod = 0.
+        
+        self.dot_caustic = 0
+        self.dotbuff_caustic_mod = 1.
+        self.dotbuff_caustic_dhmod = 0.
+        self.dotbuff_caustic_crmod = 0.
+    
     
     def buff(self):
-        print('barrage:',self.buff_barrage)
-        print('battle voice:',self.buff_battle)
-        print('raging strikes:',self.buff_raging)
-        print('radient finale:',self.buff_radient)
-        print('wanderer minuet:', self.buff_wanderer)
-        print('mage ballad:',self.buff_mage)
-        print('army paeon:',self.buff_army)
+        print('barrage:',self.buff_barrage*0.01)
+        print('battle voice:',self.buff_battle*0.01)
+        print('raging strikes:',self.buff_raging*0.01)
+        print('radient finale:',self.buff_radient*0.01)
+        print('wanderer minuet:', self.buff_wanderer*0.01)
+        print('mage ballad:',self.buff_mage*0.01)
+        print('army paeon:',self.buff_army*0.01)
         
     def cooldown(self):
-        print('Raging strikes', self.cool_raging/100)
-        print('Radient Finale',self.cool_radient/100)
-        print('Battle voice',self.cool_battle/100)
-        print('Barrage',self.cool_barrage/100)
-        print('Sidewinder', self.cool_sidewinder/100)
-        print('Bloodletter',self.cool_blood/100,', stack: ',self.available_blood)
-        print('Empyreal Arrow',self.cool_empyreal/100)
-        print('Wanderer minuet', self.cool_wanderer/100)
-        print('Mage ballad',self.cool_mage/100)
-        print('Army paeon',self.cool_army/100)
+        print('Raging strikes', self.cool_raging*0.01)
+        print('Radient Finale',self.cool_radient*0.01)
+        print('Battle voice',self.cool_battle*0.01)
+        print('Barrage',self.cool_barrage*0.01)
+        print('Sidewinder', self.cool_sidewinder*0.01)
+        print('Bloodletter',self.cool_blood*0.01,', stack: ',self.available_blood)
+        print('Empyreal Arrow',self.cool_empyreal*0.01)
+        print('Wanderer minuet', self.cool_wanderer*0.01)
+        print('Mage ballad',self.cool_mage*0.01)
+        print('Army paeon',self.cool_army*0.01)
         
     def check_buff(self):
         pcr = self.pcr
@@ -118,7 +123,7 @@ class Bard():
         if self.buff_battle>0:
             pdh+=0.2
         if self.buff_raging>0:
-            buff *=115 /100
+            buff *=115 *0.01
         if self.buff_radient>0:
             buff *=(100+self.radient_coda*2) * 0.01
         return buff, pcr, pdh
@@ -127,7 +132,7 @@ class Bard():
         buff, pcr, pdh = self.check_buff()
             
         d1 = int(potency * self.atk * self.dt)
-        d2 = int(int(d1*int(self.wd))*self.jobmod/100)
+        d2 = int(int(d1*int(self.wd))*self.jobmod*0.01)
         is_crit, is_dh = False, False
         if np.random.random()<pcr:
             d2 = int(d2 * self.dcr)
@@ -146,7 +151,7 @@ class Bard():
         return int(dmg)
     
     def calculate_DOT(self,potency,buff,pcr,pdh,skill_name):
-        d1 = potency*self.atk*f.f_det(self.dt)/100
+        d1 = potency*self.atk*f.f_det(self.dt)*0.01
         d2 = d1 * self.spd*self.wd*self.jobmod
         d3 = int(f.random_dmg(d2))
         
@@ -273,7 +278,9 @@ class Bard():
                 self.tick()
         dmg = self.calculate_dmg(100,'Iron Jaws')
         self.dot_caustic = 45* self.time_multiply
+        self.tick_dot_caustic = 3 * self.time_multiply
         self.dot_storm = 45* self.time_multiply
+        self.tick_dot_storm = 3* self.time_multiply
         
         self.start_caustic = self.elapsed
         self.start_storm = self.elapsed
@@ -486,7 +493,7 @@ class Bard():
                 
             if (self.cool_blood <=0 and self.available_blood<3):
                 self.available_blood+=1
-                self.cool_blood = 15
+                self.cool_blood += 15 *self.time_multiply
                 
             if (self.buff_wanderer>0 or self.buff_mage>0 or self.buff_army>0):
                 self.tick_song-=self.time_per_tick
@@ -528,7 +535,7 @@ class Bard():
                 self.stack_wanderer+=1
                 
         elif self.buff_mage>0:
-            self.cool_blood-= 7.5 * self.time_multiply
+            self.cool_blood -= 7.5 * self.time_multiply
 
         elif self.buff_army>0:
             if self.stack_army<4:
@@ -542,7 +549,7 @@ class Bard():
             if self.buff_wanderer>0:
                 print('Wanderer Repertoire:', self.stack_wanderer, 'time:',self.elapsed/self.time_multiply)
             if self.buff_mage>0:
-                print('Mage Repertoire Blood available:', self.blood, 'Blood cooldown', self.cool_blood,'time:',self.elapsed/self.time_multiply)
+                print('Mage Repertoire Blood available:', self.available_blood, 'Blood cooldown',self.cool_blood/self.time_multiply, 'time:',self.elapsed/self.time_multiply)
             if self.buff_army>0:
                 print('Army Repertoire:',self.stack_army, 'Global cooldwn:', self.gc_ap,'time:',self.elapsed/self.time_multiply)
     

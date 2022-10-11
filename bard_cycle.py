@@ -57,13 +57,13 @@ def burst(agent):
     gc_in_wanderer(agent)
     agent.radient()
     agent.battle()
-    if agent.dot_caustic<38*agent.time_multiply:
+    if agent.dot_caustic< 38 * agent.time_multiply:
         agent.iron_jaws()
     else:
         gc_in_wanderer(agent)
 
 def gc_in_wanderer(agent):
-    if (agent.dot_caustic<3 * agent.time_multiply or agent.dot_storm<3 * agent.time_multiply):
+    if (agent.dot_caustic < agent.gc_ap or agent.dot_storm< agent.gc_ap):
         agent.iron_jaws()
     elif agent.available_blast:
         agent.blast_arrow()
@@ -82,14 +82,14 @@ def ngc_in_wanderer(agent):
     elif agent.available_blood>0:
         agent.blood()
     
-    if agent.buff_wanderer< 3 *agent.time_multiply:
+    if agent.buff_wanderer< 3 * agent.time_multiply:
         if agent.stack_wanderer>0:
             agent.pitch()
         else:
             agent.mage_ballad()
         
 def gc_in_mage(agent):
-    if (agent.dot_caustic < 3 * agent.time_multiply or agent.dot_storm < 3 * agent.time_multiply):
+    if (agent.dot_caustic < agent.gc_ap or agent.dot_storm < agent.gc_ap):
         agent.iron_jaws()
     elif (agent.soul==100 and agent.buff_mage > 15 * agent.time_multiply):
         agent.apex_arrow()
@@ -112,18 +112,18 @@ def ngc_in_mage(agent):
         agent.army_paeon()
         
 def gc_in_army(agent):
-    if (agent.dot_caustic< 3 * agent.time_multiply or agent.dot_storm< 3 *agent.time_multiply):
+    if (agent.dot_caustic< agent.gc_ap or agent.dot_storm< agent.gc_ap):
         agent.iron_jaws()
     else:
         agent.burst_shot()
         
 def ngc_in_army(agent):
+    if (agent.cool_wanderer == 0 and agent.cool_raging == 0):
+        agent.wanderer_minuet()
     if (agent.available_blood>2 and agent.cool_blood<agent.gc_ap):
         agent.blood()
     if agent.cool_empyreal<=0:
         agent.empyreal()
-    if agent.buff_army<3 * agent.time_multiply:
-        agent.wanderer_minuet()
         
 def GC(agent):
     if agent.buff_wanderer>0:
@@ -163,14 +163,20 @@ if __name__=='__main__':
     
     opening(agent)
     
+    
     while not agent.done:
         if agent.cool_wanderer<=0:
             burst(agent)
-        
-        time.sleep(0.5)
+        if (agent.buff_wanderer ==0 and agent.buff_mage ==0 and agent.buff_army==0):
+            if agent.cool_wanderer<agent.gc_ap:
+                agent.wanderer_minuet()
+            if agent.cool_mage<agent.gc_ap:
+                agent.mage_ballad()
+            if agent.cool_army<agent.gc_ap:
+                agent.army_paeon()
+
         GC(agent)
-        time.sleep(0.5)
         NGC(agent)
-        time.sleep(0.5)
         NGC(agent)
-        
+    
+    act_log = agent.extract_log()

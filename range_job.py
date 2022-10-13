@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from collections import deque
 
-class character():
+class Character():
     def __init__(self,cr,dh,dt,stat,wd,spd,period,print_log = 0):
         self.pcr,self.dcr = f.f_crit(cr)
         self.pdh = f.f_dh(dh)
@@ -136,7 +136,7 @@ class Dancer(Character):
         self.elapsed = opening
         self.tick_autoshot = 0
     
-        self.buff_devilment = 0
+        self.buff_ = 0
         self.buff_standard = 0
         self.buff_technical = 0
         
@@ -373,8 +373,80 @@ class Dancer(Character):
                     self.done=1
                     
 class Machinist(Character):
+    def __init__(self,cr,dh,dt,stat,wd,spd,period,print_log = 0):
+        self.pcr,self.dcr = f.f_crit(cr)
+        self.pdh = f.f_dh(dh)
+        self.dt = f.f_det(dt)
+        self.dex = stat
+        self.weapon = wd
+        self.atk = f.f_atk(stat)
+        self.wd = f.f_wd(wd)
+        self.spd = f.f_spd(spd)
+        self.jobmod = 1.2*1.1
+        self.weapon_delay = 3.04
+        self.left_time = period
+        self.elapsed = 0
+        self.tick_autoshot = 0
+        
+        self.print_log = print_log
+        self.time_multiply = 100
+        self.time_per_tick = 1
+        self.tick_per_act = 60
+        
+        self.global_cooldown=0
+        self.gc = f.f_gc(spd)*self.time_multiply
     
-                    
+    def initialize_cooldown(self):
+        self.cool_drill = 0
+        self.cool_airanchor = 0
+        self.cool_chainsaw = 0
+        self.cool_reassemble = 0
+        self.cool_gaussround = 0
+        self.cool_wildfire = 0
+        self.cool_ricochet = 0
+        self.cool_barrelstabilizer = 0
+        
+        '''
+            if skill_name=='Drill':
+                potency_list.append(570)
+                gc_list.append(self.gc)
+            elif skill_name=='Air Anchor':
+                potency_list.append(570)
+                gc_list.append(self.gc)
+            elif skill_name=='Chain Saw':
+                potency_list.append(570)
+                gc_list.append(self.gc)
+            elif skill_name== 'Heated Split Shot':
+                potency_list.append(380)
+                gc_list.append(self.gc)
+            elif skill_name=='Heated Slug Shot':
+                potency_list.append(380)
+                gc_list.append(self.gc)
+            elif skill_name=='Heated Clean Shot':
+                potency_list.append(460)
+                gc_list.append(self.gc)
+            elif skill_name=='Heat Blast':
+                potency_list.append(170)
+                gc_list.append(1.5)
+            elif skill_name=='Gauss Round':
+                potency_list.append(120)
+                gc_list.append(0)
+            elif skill_name=='Ricochet':
+                potency_list.append(120)
+                gc_list.append(0)
+            elif skill_name=='Arm Punch':
+                potency_list.append(120)
+                gc_list.append(0)
+            elif skill_name=='Pile Bunker':
+                potency_list.append(650)
+                gc_list.append(0)
+            elif skill_name=='Crowned Collider':
+                potency_list.append(750)
+                gc_list.append(0)
+            elif skill_name=='Shot':
+                potency_list.append(100)
+                gc_list.append(0)
+                '''
         
 if __name__=='__main__':
     #https://etro.gg/gearset/cec981af-25c7-4ffb-905e-3024411b797a

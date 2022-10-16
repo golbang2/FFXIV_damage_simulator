@@ -5,7 +5,7 @@ Created on Mon Sep 12 16:26:50 2022
 @author: Taeyoon
 """
 
-import bard
+import range_job as job
 import functions as f
 import time
 
@@ -159,24 +159,23 @@ if __name__=='__main__':
     pcr,dcr = f.f_crit(cr)
     pdh = f.f_dh(dh)
     
-    agent = bard.Bard(cr,dh,dt,stat,wd,spd,period,print_log = 1)
+    bard = job.Bard(cr,dh,dt,stat,wd,spd,period,print_log = 1)
     
-    opening(agent)
-    
-    
-    while not agent.done:
-        if agent.cool_wanderer<=0:
-            burst(agent)
-        if (agent.buff_wanderer ==0 and agent.buff_mage ==0 and agent.buff_army==0):
-            if agent.cool_wanderer<agent.gc_ap:
-                agent.wanderer_minuet()
-            if agent.cool_mage<agent.gc_ap:
-                agent.mage_ballad()
-            if agent.cool_army<agent.gc_ap:
-                agent.army_paeon()
+    opening(bard)
 
-        GC(agent)
-        NGC(agent)
-        NGC(agent)
+    while not bard.done:
+        if bard.cool_wanderer<=0:
+            burst(bard)
+        if (bard.buff_wanderer ==0 and bard.buff_mage ==0 and bard.buff_army==0):
+            if bard.cool_wanderer<bard.gc_ap:
+                bard.wanderer_minuet()
+            if bard.cool_mage<bard.gc_ap:
+                bard.mage_ballad()
+            if bard.cool_army<bard.gc_ap:
+                bard.army_paeon()
+
+        GC(bard)
+        NGC(bard)
+        NGC(bard)
     
-    act_log = agent.extract_log()
+    act_log = bard.extract_log()

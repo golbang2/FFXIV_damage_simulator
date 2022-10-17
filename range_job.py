@@ -685,6 +685,8 @@ class Bard():
         df = pd.DataFrame(self.event_log,columns=['Skill', 'Type','Damage','Crit','Dhit','Time'])
         return df
     
+    
+    
 class Dancer(Character):
     def __init__(self,cr,dh,dt,stat,wd,spd,period, print_log =0, opening = -15):
         super().__init__(cr,dh,dt,stat,wd,spd,period,print_log)
@@ -911,33 +913,33 @@ class Dancer(Character):
             self.ability()
             return dmg
         
-        def tick(self,iteration=1):
-            for i in range(iteration):
-                self.elapsed += self.time_per_tick
-                    
-                self.tick_autoshot-=self.time_per_tick
+    def tick(self,iteration=1):
+        for i in range(iteration):
+            self.elapsed += self.time_per_tick
                 
-                self.cool_devilment -= self.time_per_tick
-                self.cool_flourish -= self.time_per_tick
-                self.cool_standard -= self.time_per_tick
-                self.cool_technical -= self.time_per_tick
+            self.tick_autoshot-=self.time_per_tick
+            
+            self.cool_devilment -= self.time_per_tick
+            self.cool_flourish -= self.time_per_tick
+            self.cool_standard -= self.time_per_tick
+            self.cool_technical -= self.time_per_tick
+            
+            self.buff_devilment -= self.time_per_tick
+            self.buff_standard -= self.time_per_tick
+            self.buff_technical -= self.time_per_tick
+            
+            self.global_cooldown -= self.time_per_tick
+            
+            if self.tick_esprit <=0:
+                self.tick_esprit = self.gc
+                self.esprit += 2.5
+            
+            if self.tick_autoshot<0.001:
+                self.tick_autoshot = 3* self.time_multiply
+                self.auto_shot()
                 
-                self.buff_devilment -= self.time_per_tick
-                self.buff_standard -= self.time_per_tick
-                self.buff_technical -= self.time_per_tick
-                
-                self.global_cooldown -= self.time_per_tick
-                
-                if self.tick_esprit <=0:
-                    self.tick_esprit = self.gc
-                    self.esprit += 2.5
-                
-                if self.tick_autoshot<0.001:
-                    self.tick_autoshot = 3* self.time_multiply
-                    self.auto_shot()
-                    
-                if self.elapsed > self.left_time:
-                    self.done=1
+            if self.elapsed > self.left_time:
+                self.done=1
                     
 class Machinist(Character):
     def __init__(self,cr,dh,dt,stat,wd,spd,period,print_log = 0):
@@ -1044,7 +1046,31 @@ class Machinist(Character):
     def gaussround(self):
         if self.cool_gaussround==0:
             dmg = self.calculate_dmg(120, 'Gauss Round')
-            self.cool_gaussround = 30
+            self.cool_gaussround = 30 * self.time_multiply
+            return dmg
+            
+    def ricochet(self):
+        if self.cool_gaussround == 0:
+            dmg = self.calculate_dmg(120, 'Ricochet')
+            self.cool_ricochet = 30 * self.time_multiply
+            return dmg
+        
+    def heatblast(self):
+        if self.global_cooldown>0:
+            while self.global_cooldown>0:
+                self.tick()
+        
+        self.ngc = 1
+        self.global_cooldown = 1.5 * self.time_multiply
+        dmg = self.calculate_dmg(180,'Technical Finish')
+        self.cool_gaussround -= 15 * self.time_multiply
+        self.cool_ricochet -= 15 * self.time_multiply
+        
+        return dmg
+    
+    def queen_armpunch(self):
+        dmg = self.calculate_dmg(120, 'ArmPunch')
+        
         
 if __name__=='__main__':
 

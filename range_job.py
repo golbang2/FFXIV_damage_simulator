@@ -1069,8 +1069,23 @@ class Machinist(Character):
         return dmg
     
     def queen_armpunch(self):
-        dmg = self.calculate_dmg(120, 'ArmPunch')
-        
+        self.queen_cool = 1.56 * self.time_multiply
+        dmg = self.calculate_dmg(120, 'Queen ArmPunch')
+        return dmg
+    
+    def queen_dash(self):
+        self.queen_cool = 3.17 * self.time_multiply
+        dmg = self.calculate_dmg(240, 'Queen Dash')
+        return dmg
+    
+    def queen_pilebunker(self):
+        self.queen_cool = 2.05 * self.time_multiply
+        dmg = self.calculate_dmg(680, 'Queen Pilebunker')
+        return dmg
+    
+    def queen_collider(self):
+        dmg = self.calculate_dmg(780, 'Queen Collider')
+        return dmg
         
 if __name__=='__main__':
 

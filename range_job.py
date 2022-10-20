@@ -1068,6 +1068,35 @@ class Machinist(Character):
         
         return dmg
     
+    def splitshot(self):
+        if self.global_cooldown>0:
+            while self.global_cooldown>0:
+                self.tick()
+        dmg = self.calculate_dmg(200, 'Split Shot')
+        self.heat +=5
+        self.weapon_skill()
+        return dmg
+    
+    def slugshot(self):
+        if self.global_cooldown>0:
+            while self.global_cooldown>0:
+                self.tick()
+        dmg = self.calculate_dmg(280, 'Slug Shot')
+        self.heat +=5
+        self.weapon_skill()
+        return dmg
+    
+    def cleanshot(self):
+        if self.global_cooldown>0:
+            while self.global_cooldown>0:
+                self.tick()
+        dmg = self.calculate_dmg(360, 'Slug Shot')
+        self.heat +=10
+        self.battery += 10
+        self.weapon_skill()
+        return dmg
+        
+        
     def queen_armpunch(self):
         self.queen_cool = 1.56 * self.time_multiply
         dmg = self.calculate_dmg(120, 'Queen ArmPunch')
@@ -1086,6 +1115,12 @@ class Machinist(Character):
     def queen_collider(self):
         dmg = self.calculate_dmg(780, 'Queen Collider')
         return dmg
+    
+    def automaton_queen(self):
+        self.queen_left = self.batter * 0.2 * self.time_multiply
+        self.battery = 0
+        self.ability()
+        
         
 if __name__=='__main__':
 

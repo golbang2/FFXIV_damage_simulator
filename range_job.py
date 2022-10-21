@@ -978,47 +978,6 @@ class Machinist(Character):
         self.cool_ricochet = 0
         self.cool_barrelstabilizer = 0
         
-        '''
-            if skill_name=='Drill':
-                potency_list.append(570)
-                gc_list.append(self.gc)
-            elif skill_name=='Air Anchor':
-                potency_list.append(570)
-                gc_list.append(self.gc)
-            elif skill_name=='Chain Saw':
-                potency_list.append(570)
-                gc_list.append(self.gc)
-            elif skill_name== 'Heated Split Shot':
-                potency_list.append(380)
-                gc_list.append(self.gc)
-            elif skill_name=='Heated Slug Shot':
-                potency_list.append(380)
-                gc_list.append(self.gc)
-            elif skill_name=='Heated Clean Shot':
-                potency_list.append(460)
-                gc_list.append(self.gc)
-            elif skill_name=='Heat Blast':
-                potency_list.append(170)
-                gc_list.append(1.5)
-            elif skill_name=='Gauss Round':
-                potency_list.append(120)
-                gc_list.append(0)
-            elif skill_name=='Ricochet':
-                potency_list.append(120)
-                gc_list.append(0)
-            elif skill_name=='Arm Punch':
-                potency_list.append(120)
-                gc_list.append(0)
-            elif skill_name=='Pile Bunker':
-                potency_list.append(650)
-                gc_list.append(0)
-            elif skill_name=='Crowned Collider':
-                potency_list.append(750)
-                gc_list.append(0)
-            elif skill_name=='Shot':
-                potency_list.append(100)
-                gc_list.append(0)
-                '''
     def initialize_buff(self):
         self.buff_reassemble = 0
         self.buff_hypercharge = 0
@@ -1034,6 +993,8 @@ class Machinist(Character):
             dmg = self.calculate_dmg(580, 'Air Anchor')
             self.cool_airanchor = self.gc*16
             self.battery += 20
+            if self.battery>100:
+                self.battery = 100
             return dmg
         
     def chainsaw(self):
@@ -1041,6 +1002,8 @@ class Machinist(Character):
             dmg = self.calculate_dmg(580, 'Chainsaw')
             self.cool_chainsaw = self.gc *24
             self.battery += 20
+            if self.battery>100:
+                self.battery = 100
             return dmg
         
     def gaussround(self):
@@ -1073,7 +1036,11 @@ class Machinist(Character):
             while self.global_cooldown>0:
                 self.tick()
         dmg = self.calculate_dmg(200, 'Split Shot')
+        
         self.heat +=5
+        if self.heat>100:
+            self.heat = 100
+        
         self.weapon_skill()
         return dmg
     
@@ -1083,6 +1050,9 @@ class Machinist(Character):
                 self.tick()
         dmg = self.calculate_dmg(280, 'Slug Shot')
         self.heat +=5
+        
+        if self.heat>100:
+            self.heat = 100
         self.weapon_skill()
         return dmg
     
@@ -1092,7 +1062,14 @@ class Machinist(Character):
                 self.tick()
         dmg = self.calculate_dmg(360, 'Slug Shot')
         self.heat +=10
+        
+        if self.heat>100:
+            self.heat = 100
         self.battery += 10
+        
+        if self.battery>100:
+            self.battery = 100
+        
         self.weapon_skill()
         return dmg
         
@@ -1120,6 +1097,43 @@ class Machinist(Character):
         self.queen_left = self.batter * 0.2 * self.time_multiply
         self.battery = 0
         self.ability()
+        self.queen_dash()
+        
+    def wildfire(self):
+        self.wildfire_left = 10 * self.time_multiply
+        self.cool_wildfire = 120 * self.time_multiply
+    
+    def detonator(self, hit = 6):
+        dmg = self.calculate_dmg(220 * hit, 'Wildfire')
+        return dmg
+        
+    def tick(self,iteration=1):
+        for i in range(iteration):
+            self.elapsed += self.time_per_tick
+                
+            self.tick_autoshot-=self.time_per_tick
+            
+            self.cool_ -= self.time_per_tick
+            
+            self.buff_ -= self.time_per_tick
+            
+            self.global_cooldown -= self.time_per_tick
+            
+            self.wildfire_left -= self.time_per_tick
+            if self.wildfire_left==0:
+                self.detonator()
+            
+            if self.tick_autoshot<0.001:
+                self.tick_autoshot = 3* self.time_multiply
+                self.auto_shot()
+                
+                
+            
+                
+                
+            if self.elapsed > self.left_time:
+                self.done=1
+        
         
         
 if __name__=='__main__':

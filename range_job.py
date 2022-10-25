@@ -412,7 +412,7 @@ class Bard():
             
             if self.print_log:
                 print('Raging Strikes time:', round(self.elapsed/self.time_multiply,2))
-            self.event_log.append(('Raging Strikes','Buff', np.nan, np.nan,np.nan, round(self.elapsed/self.time_multiply,3)))
+            #self.event_log.append(('Raging Strikes','Buff', np.nan, np.nan,np.nan, round(self.elapsed/self.time_multiply,3)))
             self.ability()
             
     def battle(self):
@@ -423,7 +423,7 @@ class Bard():
             if self.print_log:
                 print('Battle Voice time:', round(self.elapsed/self.time_multiply,2))
             
-            self.event_log.append(('Battle Voice','Buff', np.nan, np.nan,np.nan, round(self.elapsed/self.time_multiply,3)))
+            #self.event_log.append(('Battle Voice','Buff', np.nan, np.nan,np.nan, round(self.elapsed/self.time_multiply,3)))
             self.ability()
         
     def barrage(self):
@@ -435,7 +435,7 @@ class Bard():
             if self.print_log:
                 print('Barrage time:', round(self.elapsed/self.time_multiply,2))
             
-            self.event_log.append(('Barrage','Buff', np.nan, np.nan,np.nan, round(self.elapsed/self.time_multiply,3)))
+            #self.event_log.append(('Barrage','Buff', np.nan, np.nan,np.nan, round(self.elapsed/self.time_multiply,3)))
             self.ability()
             
     def radient(self):
@@ -448,7 +448,7 @@ class Bard():
                 
                 if self.print_log:
                     print('Radient Finale time:', round(self.elapsed/self.time_multiply,2))
-                self.event_log.append(('Radient Finale','Buff', np.nan, np.nan,np.nan, round(self.elapsed/self.time_multiply,3)))
+                #self.event_log.append(('Radient Finale','Buff', np.nan, np.nan,np.nan, round(self.elapsed/self.time_multiply,3)))
                 self.ability()
                 
     def blood(self):
@@ -1036,10 +1036,9 @@ class Machinist(Character):
         
         self.ngc = 1
         self.global_cooldown = 1.5 * self.time_multiply
-        dmg = self.calculate_dmg(180,'Technical Finish')
+        dmg = self.calculate_dmg(200,'Heatblast')
         self.cool_gaussround -= 15 * self.time_multiply
         self.cool_ricochet -= 15 * self.time_multiply
-        
         return dmg
     
     def splitshot(self):
@@ -1127,15 +1126,27 @@ class Machinist(Character):
         self.buff_reassemble = 5 * self.time_multiply
         self.cool_reassemble = 55 * self.time_multiply
         
+    def hypercharge(self):
+        self.buff_hypercharge = 8*self.time_multiply
+        self.cool_hypercharge = 10 * self.time_multiply
+        
     def tick(self,iteration=1):
         for i in range(iteration):
             self.elapsed += self.time_per_tick
                 
             self.tick_autoshot-=self.time_per_tick
             
-            self.cool_ -= self.time_per_tick
+            self.cool_drill -= self.time_per_tick
+            self.cool_airanchor -= self.time_per_tick
+            self.cool_chainsaw -= self.time_per_tick
+            self.cool_reassemble -= self.time_per_tick
+            self.cool_gaussround -= self.time_per_tick
+            self.cool_wildfire -= self.time_per_tick
+            self.cool_ricochet -= self.time_per_tick
+            self.cool_barrelstabilizer -= self.time_per_tick
             
-            self.buff_ -= self.time_per_tick
+            self.buff_reassemble -= self.time_per_tick
+            self.buff_hypercharge -= self.time_per_tick
             
             self.global_cooldown -= self.time_per_tick
             
@@ -1155,7 +1166,7 @@ class Machinist(Character):
                 
             if self.elapsed > self.left_time:
                 self.done=1
-        
+    
         
         
 if __name__=='__main__':

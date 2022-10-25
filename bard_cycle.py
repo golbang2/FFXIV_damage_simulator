@@ -143,12 +143,13 @@ def NGC(agent):
 
         
 if __name__=='__main__':
+    #https://etro.gg/gearset/cec981af-25c7-4ffb-905e-3024411b797a
     period = 300
     cr = 2229
     dt = 1381
     dh = 1662
     spd = 479
-    stat = 2575
+    stat = 2574
     wd = 120
     weapon_delay = 3.04
 

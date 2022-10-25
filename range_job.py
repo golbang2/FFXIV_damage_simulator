@@ -565,7 +565,6 @@ class Bard():
             elif self.buff_army>0:
                 self.buff_army-=self.time_per_tick
                 
-                
             self.tick_autoshot-=self.time_per_tick
             self.dot_caustic-=self.time_per_tick
             self.dot_storm-=self.time_per_tick
@@ -684,9 +683,7 @@ class Bard():
     def extract_log(self):
         df = pd.DataFrame(self.event_log,columns=['Skill', 'Type','Damage','Crit','Dhit','Time'])
         return df
-    
-    
-    
+
 class Dancer(Character):
     def __init__(self,cr,dh,dt,stat,wd,spd,period, print_log =0, opening = -15):
         super().__init__(cr,dh,dt,stat,wd,spd,period,print_log)
@@ -984,13 +981,22 @@ class Machinist(Character):
         
     def drill(self):
         if self.cool_drill==0:
-            dmg = self.calculate_dmg(580, 'Drill')
+            if self.buff_reassemble>0:
+                dmg = self.calculate_dmg(580, 'Drill', 1, 1)
+                self.buff_reassemble = 0
+            else:
+                dmg = self.calculate_dmg(580, 'Drill')
             self.cool_drill = self.gc * 8
             return dmg
         
     def airanchor(self):
         if self.cool_airanchor==0:
-            dmg = self.calculate_dmg(580, 'Air Anchor')
+            
+            if self.buff_reassemble>0:
+                dmg = self.calculate_dmg(580, 'Air Anchor', 1, 1)
+                self.buff_reassemble = 0
+            else:
+                dmg = self.calculate_dmg(580, 'Air Anchor')
             self.cool_airanchor = self.gc*16
             self.battery += 20
             if self.battery>100:
@@ -999,7 +1005,12 @@ class Machinist(Character):
         
     def chainsaw(self):
         if self.cool_chainsaw==0:
-            dmg = self.calculate_dmg(580, 'Chainsaw')
+            if self.buff_reassemble>0:
+                dmg = self.calculate_dmg(580, 'Chainsaw',1,1)
+                self.buff_reassemble = 0
+            else:
+                dmg = self.calculate_dmg(580, 'Chainsaw')
+            
             self.cool_chainsaw = self.gc *24
             self.battery += 20
             if self.battery>100:
@@ -1073,7 +1084,6 @@ class Machinist(Character):
         self.weapon_skill()
         return dmg
         
-        
     def queen_armpunch(self):
         self.queen_cool = 1.56 * self.time_multiply
         dmg = self.calculate_dmg(120, 'Queen ArmPunch')
@@ -1106,6 +1116,16 @@ class Machinist(Character):
     def detonator(self, hit = 6):
         dmg = self.calculate_dmg(220 * hit, 'Wildfire')
         return dmg
+    
+    def barrelstabilizer(self):
+        self.heat +=50
+        if self.heat>100:
+            self.heat =100
+        self.cool_barrelstabilizer = 120 * self.time_multiply
+        
+    def reassemble(self):
+        self.buff_reassemble = 5 * self.time_multiply
+        self.cool_reassemble = 55 * self.time_multiply
         
     def tick(self,iteration=1):
         for i in range(iteration):
@@ -1123,11 +1143,13 @@ class Machinist(Character):
             if self.wildfire_left==0:
                 self.detonator()
             
-            if self.tick_autoshot<0.001:
+            if self.tick_autoshot==0:
                 self.tick_autoshot = 3* self.time_multiply
                 self.auto_shot()
                 
-                
+            if self.wildfire_left == 0:
+                self.detonator()
+            
             
                 
                 

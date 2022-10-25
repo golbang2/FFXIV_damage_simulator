@@ -196,7 +196,6 @@ class Bard():
         self.dotbuff_caustic_dhmod = 0.
         self.dotbuff_caustic_crmod = 0.
     
-    
     def buff(self):
         print('barrage:',self.buff_barrage*0.01)
         print('battle voice:',self.buff_battle*0.01)
@@ -964,6 +963,9 @@ class Machinist(Character):
         
         self.battery = 0
         self.heat = 0
+        
+        self.initialize_cooldown()
+        self.initialize_buff()
     
     def initialize_cooldown(self):
         self.cool_drill = 0
@@ -974,6 +976,9 @@ class Machinist(Character):
         self.cool_wildfire = 0
         self.cool_ricochet = 0
         self.cool_barrelstabilizer = 0
+        self.ab_reassemble = 2
+        self.ab_gaussround = 3
+        self.ab_ricochet = 3
         
     def initialize_buff(self):
         self.buff_reassemble = 0
@@ -1018,17 +1023,32 @@ class Machinist(Character):
             return dmg
         
     def gaussround(self):
-        if self.cool_gaussround==0:
+        if self.ab_gaussround>0:
             dmg = self.calculate_dmg(120, 'Gauss Round')
-            self.cool_gaussround = 30 * self.time_multiply
+            
+            if self.ab_gaussround==3:
+                self.cool_gaussround = 30 * self.time_multiply
+            
+            self.ab_gaussround -= 1
             return dmg
             
     def ricochet(self):
-        if self.cool_gaussround == 0:
+        if self.ab_ricochet > 0:
             dmg = self.calculate_dmg(120, 'Ricochet')
-            self.cool_ricochet = 30 * self.time_multiply
+            
+            if self.ab_ricochet==3:
+                self.cool_ricochet = 30 * self.time_multiply
+            self.ab_ricochet -= 1
             return dmg
         
+    def reassemble(self):
+        if self.ab_reassemble>0:
+            self.buff_reassemble = 5 * self.time_multiply
+            
+            if self.ab_reassemble ==2:
+                self.cool_reassemble = 55 * self.time_multiply
+            self.ab_reassemble-=1
+    
     def heatblast(self):
         if self.global_cooldown>0:
             while self.global_cooldown>0:
@@ -1082,31 +1102,11 @@ class Machinist(Character):
         
         self.weapon_skill()
         return dmg
-        
-    def queen_armpunch(self):
-        self.queen_cool = 1.56 * self.time_multiply
-        dmg = self.calculate_dmg(120, 'Queen ArmPunch')
-        return dmg
-    
-    def queen_dash(self):
-        self.queen_cool = 3.17 * self.time_multiply
-        dmg = self.calculate_dmg(240, 'Queen Dash')
-        return dmg
-    
-    def queen_pilebunker(self):
-        self.queen_cool = 2.05 * self.time_multiply
-        dmg = self.calculate_dmg(680, 'Queen Pilebunker')
-        return dmg
-    
-    def queen_collider(self):
-        dmg = self.calculate_dmg(780, 'Queen Collider')
-        return dmg
     
     def automaton_queen(self):
         self.queen_left = self.batter * 0.2 * self.time_multiply
         self.battery = 0
         self.ability()
-        self.queen_dash()
         
     def wildfire(self):
         self.wildfire_left = 10 * self.time_multiply
@@ -1122,10 +1122,6 @@ class Machinist(Character):
             self.heat =100
         self.cool_barrelstabilizer = 120 * self.time_multiply
         
-    def reassemble(self):
-        self.buff_reassemble = 5 * self.time_multiply
-        self.cool_reassemble = 55 * self.time_multiply
-        
     def hypercharge(self):
         self.buff_hypercharge = 8*self.time_multiply
         self.cool_hypercharge = 10 * self.time_multiply
@@ -1136,14 +1132,35 @@ class Machinist(Character):
                 
             self.tick_autoshot-=self.time_per_tick
             
-            self.cool_drill -= self.time_per_tick
-            self.cool_airanchor -= self.time_per_tick
-            self.cool_chainsaw -= self.time_per_tick
-            self.cool_reassemble -= self.time_per_tick
-            self.cool_gaussround -= self.time_per_tick
-            self.cool_wildfire -= self.time_per_tick
-            self.cool_ricochet -= self.time_per_tick
-            self.cool_barrelstabilizer -= self.time_per_tick
+            if self.cool_drill>0:
+                self.cool_drill -= self.time_per_tick
+            if self.cool_airanchor>0:
+                self.cool_airanchor -= self.time_per_tick
+            if self.cool_chainsaw>0:
+                self.cool_chainsaw -= self.time_per_tick
+            if self.cool_wildfire>0:
+                self.cool_wildfire -= self.time_per_tick
+
+            if self.cool_barrelstabilizer>0:                
+                self.cool_barrelstabilizer -= self.time_per_tick
+            
+            if self.cool_reassemble>0:
+                self.cool_reassemble -= self.time_per_tick
+                if (self.cool_reassemble ==0 and self.ab_reassemble<2):
+                    self.cool_gaussround +=55*self.time_multiply
+                    self.ab_gaussround += 1
+            
+            if self.cool_gaussround>0:
+                self.cool_gaussround -= self.time_per_tick
+                if (self.cool_gaussround ==0 and self.ab_gaussround<3):
+                    self.cool_gaussround +=30*self.time_multiply
+                    self.ab_gaussround += 1
+
+            if self.cool_ricochet>0:                
+                self.cool_ricochet -= self.time_per_tick
+                if (self.cool_ricochet ==0 and self.ab_ricochet<3):
+                    self.cool_ricochet += 30 * self.time_multiply
+                    self.ab_gaussround += 1
             
             self.buff_reassemble -= self.time_per_tick
             self.buff_hypercharge -= self.time_per_tick
@@ -1160,9 +1177,6 @@ class Machinist(Character):
                 
             if self.wildfire_left == 0:
                 self.detonator()
-            
-            
-                
                 
             if self.elapsed > self.left_time:
                 self.done=1
@@ -1171,23 +1185,7 @@ class Machinist(Character):
         
 if __name__=='__main__':
 
-    period = 300
-    cr = 2193
-    dt = 1507
-    dh = 1626
-    spd = 436
-    dex = 2575
-    wd = 120
-    weapon_delay = 3.12
 
-    main = 390
-    sub = 400
-    div = 1900
-    
-    pcr,dcr = f.f_crit(cr)
-    pdh = f.f_dh(dh)
-    
-    agent = Dancer(cr,dh,dt,dex,wd,spd,period,print_log = 1)
 
     #https://etro.gg/gearset/cec981af-25c7-4ffb-905e-3024411b797a
     period = 300

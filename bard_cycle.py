@@ -130,7 +130,7 @@ def GC(agent):
         gc_in_wanderer(agent)
     elif agent.buff_mage>0:
         gc_in_mage(agent)
-    elif agent.buff_army>0:
+    else:
         gc_in_army(agent)
         
 def NGC(agent):
@@ -160,22 +160,15 @@ if __name__=='__main__':
     pdh = f.f_dh(dh)
     
     bard = job.Bard(cr,dh,dt,stat,wd,spd,period,print_log = 1)
-    
+    '''
     opening(bard)
 
     while not bard.done:
         if bard.cool_wanderer<=0:
             burst(bard)
-        if (bard.buff_wanderer ==0 and bard.buff_mage ==0 and bard.buff_army==0):
-            if bard.cool_wanderer<bard.gc_ap:
-                bard.wanderer_minuet()
-            if bard.cool_mage<bard.gc_ap:
-                bard.mage_ballad()
-            if bard.cool_army<bard.gc_ap:
-                bard.army_paeon()
-
         GC(bard)
         NGC(bard)
         NGC(bard)
     
     act_log = bard.extract_log()
+    '''

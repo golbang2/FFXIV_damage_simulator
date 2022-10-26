@@ -135,6 +135,7 @@ class Bard():
         self.left_time = period
         self.elapsed = 0
         self.tick_autoshot = 0
+        self.ethos = 0
         
         self.initialize_buff()
         self.initialize_dot()
@@ -150,7 +151,7 @@ class Bard():
         self.event_log = deque()
         
         self.gc = f.f_gc(spd)*self.time_multiply
-        self.calculate_gc(0)
+        self.calculate_gc()
         
         self.done =0
         
@@ -184,6 +185,7 @@ class Bard():
         self.buff_army = 0
         self.buff_mage = 0
         self.buff_wanderer = 0
+        self.buff_army_muse = 0
         
     def initialize_dot(self):
         self.dot_storm = 0
@@ -505,14 +507,21 @@ class Bard():
             self.buff_wanderer = 45 * self.time_multiply
             self.stack_coda +=1
             self.cool_wanderer = 120* self.time_multiply
+            self.stack_wanderer = 0
+            
             self.tick_song = 3 * self.time_multiply
-            self.calculate_gc(0)
+            self.calculate_gc()
             
             self.buff_mage = 0
             self.buff_army = 0 
             
             dmg = self.calculate_dmg(100,"Wanderer Minuet")
             self.ability()
+            
+            if self.ethos==1:
+                self.buff_army_muse=10 * self.time_multiply
+                self.ethos = 0
+            
             return dmg
     
     def mage_ballad(self):
@@ -525,7 +534,7 @@ class Bard():
             self.cool_mage = 120* self.time_multiply
 
             self.tick_song = 3* self.time_multiply
-            self.calculate_gc(0)
+            self.calculate_gc()
             
             self.buff_wanderer = 0
             self.buff_army = 0
@@ -542,15 +551,18 @@ class Bard():
             self.buff_army = 45* self.time_multiply
             self.stack_coda +=1
             self.cool_army = 120* self.time_multiply
+            self.stack_army = 0
             
             self.tick_song = 3* self.time_multiply
-            self.calculate_gc(0)
+            self.calculate_gc()
             
             self.buff_wanderer = 0
             self.buff_mage = 0
             
             dmg = self.calculate_dmg(100,"Army Paeon")
             self.ability()
+            
+            self.ethos = 1
             return dmg
     
     def tick(self,iteration=1):
@@ -606,8 +618,8 @@ class Bard():
                 
             if (self.buff_wanderer>0 or self.buff_mage>0 or self.buff_army>0):
                 self.tick_song-=self.time_per_tick
-                if self.tick_song<0.001:
-                    self.effect_over_tick(self.elapsed)
+                if self.tick_song==0:
+                    self.effect_over_tick()
                     self.tick_song = 3 * self.time_multiply
                 
             if self.dot_caustic>0:
@@ -624,19 +636,29 @@ class Bard():
             
             if self.tick_autoshot<=0:
                 self.tick_autoshot = 3* self.time_multiply
+                if self.buff_army>0:
+                    self.tick_autoshot = 3 * (1-self.stack_army * 0.04) * self.time_multiply
+                if self.buff_army_muse>0:
+                    self.tick_autoshot = 3 * 0.88 * self.time_multiply
                 self.auto_shot()
                 
             if self.elapsed > self.left_time*self.time_multiply:
                 self.done=1
             
-    def effect_over_tick(self,elapsed):
+            
+    def effect_over_tick(self):
         randomnumber = np.random.random()
         if randomnumber<0.8:
             self.song_effect()
 
         
-    def calculate_gc(self,stack_army):
-        self.gc_ap = self.gc*(1-stack_army*0.04)
+    def calculate_gc(self):
+        if self.buff_army>0:
+            self.gc_ap = self.gc*(1-self.stack_army*0.04)
+        elif self.buff_army_muse>0:
+            self.gc_ap = self.gc * 0.88
+        else:
+            self.gc_ap = self.gc
         
     def song_effect(self):
         if self.buff_wanderer>0:
@@ -649,7 +671,7 @@ class Bard():
         elif self.buff_army>0:
             if self.stack_army<4:
                 self.stack_army+=1
-                self.calculate_gc(self.stack_army)
+                self.calculate_gc()
                 
         if self.soul<100:
             self.soul+=5
@@ -1025,17 +1047,14 @@ class Machinist(Character):
     def gaussround(self):
         if self.ab_gaussround>0:
             dmg = self.calculate_dmg(120, 'Gauss Round')
-            
             if self.ab_gaussround==3:
                 self.cool_gaussround = 30 * self.time_multiply
-            
             self.ab_gaussround -= 1
             return dmg
             
     def ricochet(self):
         if self.ab_ricochet > 0:
             dmg = self.calculate_dmg(120, 'Ricochet')
-            
             if self.ab_ricochet==3:
                 self.cool_ricochet = 30 * self.time_multiply
             self.ab_ricochet -= 1
@@ -1044,7 +1063,6 @@ class Machinist(Character):
     def reassemble(self):
         if self.ab_reassemble>0:
             self.buff_reassemble = 5 * self.time_multiply
-            
             if self.ab_reassemble ==2:
                 self.cool_reassemble = 55 * self.time_multiply
             self.ab_reassemble-=1
@@ -1072,6 +1090,7 @@ class Machinist(Character):
             self.heat = 100
         
         self.weapon_skill()
+        self.combo = 1
         return dmg
     
     def slugshot(self):
@@ -1084,6 +1103,7 @@ class Machinist(Character):
         if self.heat>100:
             self.heat = 100
         self.weapon_skill()
+        self.combo = 2
         return dmg
     
     def cleanshot(self):
@@ -1101,10 +1121,11 @@ class Machinist(Character):
             self.battery = 100
         
         self.weapon_skill()
+        self.combo = 0
         return dmg
     
     def automaton_queen(self):
-        self.queen_left = self.batter * 0.2 * self.time_multiply
+        self.queen_left = self.battery * 0.2 * self.time_multiply
         self.battery = 0
         self.ability()
         
@@ -1146,21 +1167,21 @@ class Machinist(Character):
             
             if self.cool_reassemble>0:
                 self.cool_reassemble -= self.time_per_tick
-                if (self.cool_reassemble ==0 and self.ab_reassemble<2):
-                    self.cool_gaussround +=55*self.time_multiply
-                    self.ab_gaussround += 1
+            if (self.cool_reassemble <0 and self.ab_reassemble<2):
+                self.cool_gaussround +=55*self.time_multiply
+                self.ab_gaussround += 1
             
             if self.cool_gaussround>0:
                 self.cool_gaussround -= self.time_per_tick
-                if (self.cool_gaussround ==0 and self.ab_gaussround<3):
-                    self.cool_gaussround +=30*self.time_multiply
-                    self.ab_gaussround += 1
+            if (self.cool_gaussround <0 and self.ab_gaussround<3):
+                self.cool_gaussround +=30*self.time_multiply
+                self.ab_gaussround += 1
 
             if self.cool_ricochet>0:                
                 self.cool_ricochet -= self.time_per_tick
-                if (self.cool_ricochet ==0 and self.ab_ricochet<3):
-                    self.cool_ricochet += 30 * self.time_multiply
-                    self.ab_gaussround += 1
+            if (self.cool_ricochet <0 and self.ab_ricochet<3):
+                self.cool_ricochet += 30 * self.time_multiply
+                self.ab_gaussround += 1
             
             self.buff_reassemble -= self.time_per_tick
             self.buff_hypercharge -= self.time_per_tick
@@ -1181,8 +1202,6 @@ class Machinist(Character):
             if self.elapsed > self.left_time:
                 self.done=1
     
-        
-        
 if __name__=='__main__':
 
 

@@ -13,8 +13,32 @@ def opening(machinist):
     machinist.buff_reassemble = 1 * machinist.time_multiply
     machinist.ab_reassemble = 1
     machinist.cool_reassemble = 51 * machinist.time_multiply
-    machinist.air_anchor()
-    
+    machinist.airanchor()
+    machinist.gaussround()
+    machinist.ricochet()
+    machinist.drill()
+    machinist.barrelstabilizer()
+    machinist.splitshot()
+    machinist.slugshot()
+    machinist.gaussround()
+    machinist.ricochet()
+    machinist.cleanshot()
+    machinist.reassemble
+    machinist.wildfire()
+    machinist.chainsaw()
+    machinist.automaton_queen()
+    machinist.hypercharge()
+    machinist.heatblast()
+    machinist.ricochet()
+    machinist.heatblast()
+    machinist.gaussround()
+    machinist.heatblast()
+    machinist.ricochet()
+    machinist.heatblast()
+    machinist.gaussround()
+    machinist.ricochet()
+    machinist.heatblast()
+    machinist.drill()
 
 
 

@@ -33,10 +33,13 @@ class Character():
         
         self.global_cooldown=0
         self.gc = f.f_gc(spd)*self.time_multiply
+        
+        self.done = 0
 
-    def calculate_dmg(self,potency,skill_name , fix_cr = 0 , fix_dh = 0):
-        buff, pcr, pdh = self.check_buff()
-            
+    def calculate_dmg(self,potency,skill_name , buff =1., buff_cr = 0, buff_dh = 0, fix_cr = 0 , fix_dh = 0):
+        pdh = self.pdh + buff_dh
+        pcr = self.pcr + buff_cr
+        
         d1 = int(potency * self.atk * self.dt)
         d2 = int(int(d1*int(self.wd))*self.jobmod/100)
         is_crit, is_dh = False, False
@@ -76,10 +79,19 @@ class Character():
         
         return dmg
     
-    def weapon_skill(self, ngc = 2):
-        self.ngc = ngc
-        self.global_cooldown = self.gc
-        self.tick(self.tick_per_act)
+    def weapon_skill(self, gc = 2.5):
+        if gc == 2.5:
+            self.ngc = 2
+            self.global_cooldown = self.gc
+            self.tick(self.tick_per_act)
+        if gc == 1.5:
+            self.ngc = 1
+            self.global_cooldown = gc * self.time_multiply
+            self.tick(self.tick_per_act)
+        if gc ==1:
+            self.ngc = 0
+            self.global_cooldown = gc * self.time_multiply
+            self.tick(self.tick_per_act)
         
     def ability(self):
         self.ngc -=1
@@ -92,10 +104,6 @@ class Character():
         left_time = self.global_cooldown - self.tick_per_act * self.ngc
         if cooldown < left_time:
             self.tick(cooldown)
-        
-    def extract_log(self):
-        df = pd.DataFrame(self.event_log,columns=['Skill', 'Type','Damage','Crit','Dhit','Time'])
-        return df
     
 class Bard():
     def __init__(self,cr,dh,dt,stat,wd,spd,period, print_log =0):
@@ -683,7 +691,7 @@ class Bard():
             self.tick(cooldown)
         
     def extract_log(self):
-        df = pd.DataFrame(self.event_log,columns=['Skill', 'Type','Damage','Crit','Dhit','Time','Raging','Radient','Battle','Song'])
+        df = pd.DataFrame(self.event_log,columns=['Skill', 'Type','Damage','Crit','Dhit','Raging','Radient','Battle','Song','Time'])
         return df
     
     def record_log(self,skill_name,dmg_type,dmg,is_crit,is_dh):
@@ -710,7 +718,7 @@ class Bard():
         else:
             song = 0
             
-        self.event_log.append((skill_name, dmg_type,int(dmg), is_crit,is_dh, round(self.elapsed/self.time_multiply,3),raging,radient,battle,song))
+        self.event_log.append((skill_name, dmg_type,int(dmg), int(is_crit),int(is_dh),raging,radient,battle,song, round(self.elapsed/self.time_multiply,3)))
 
 class Dancer(Character):
     def __init__(self,cr,dh,dt,stat,wd,spd,period, print_log =0, opening = -15):
@@ -747,6 +755,8 @@ class Dancer(Character):
         
         self.gc = f.f_gc(spd)*self.time_multiply
         self.tick_esprit = self.gc
+        
+        self.event_log = deque()
         
         
     def check_buff(self):
@@ -829,27 +839,19 @@ class Dancer(Character):
             if self.global_cooldown>0:
                 while self.global_cooldown>0:
                     self.tick()
-        
             self.cool_standard = 30* self.time_multiply
-            self.tick((1.5+1*2)*self.time_multiply)
+            self.tick(int(3.5*self.time_multiply))
             self.buff_standard = 60 * self.time_multiply
-            self.global_cooldown = 1.5 * self.time_multiply
             dmg = self.calculate_dmg(720, 'Standard Finish')
-            self.ngc = 1
+            self.weapon_skill(1.5)
             return dmg
             
     def opening_standard_finish(self):
-            if self.global_cooldown>0:
-                while self.global_cooldown>0:
-                    self.tick()
-            
-            self.cool_standard = 30* self.time_multiply
-            self.tick(15*self.time_multiply)
-            self.buff_standard = 60 * self.time_multiply
-            self.global_cooldown = 1.5 * self.time_multiply
-            dmg = self.calculate_dmg(720, 'Standard Finish')
-            self.ngc = 1
-            return dmg
+        self.cool_standard = 15* self.time_multiply
+        self.buff_standard = 60 * self.time_multiply
+        dmg = self.calculate_dmg(720, 'Standard Finish')
+        self.weapon_skill(1.5)
+        return dmg
             
     def technical_finish(self):
         if self.cool_technical<=0:
@@ -857,12 +859,11 @@ class Dancer(Character):
                 while self.global_cooldown>0:
                     self.tick()
             self.cool_technical = 120 * self.time_multiply
-            self.tick((1.5+1*4)*self.time_multiply)
+            self.tick(int(5.5*self.time_multiply))
             self.buff_technical = 15 * self.time_multiply
-            self.ngc = 1
-            self.global_cooldown = 1.5 * self.time_multiply
-            dmg = self.calculate_dmg(1200,'Technical Finish')
             self.ab_tillana = 1
+            dmg = self.calculate_dmg(1200,'Technical Finish')
+            self.weapon_skill(1.5)
             return dmg
         
     def saber_dance(self):
@@ -880,11 +881,10 @@ class Dancer(Character):
             if self.global_cooldown>0:
                 while self.global_cooldown>0:
                     self.tick()
-            self.ngc = 1
-            self.global_cooldown = 1.5 * self.time_multiply
-            self.buff_standard = 60 * self.time_multiply
             dmg = self.calculate_dmg(360)
+            self.buff_standard = 60 * self.time_multiply
             self.ab_tillana = 0
+            self.weapon_skill(1.5)
             return dmg
         
     def starfall_dance(self):
@@ -912,6 +912,7 @@ class Dancer(Character):
             self.buff_devilment = 20 * self.time_multiply
             self.cool_devilment = 120 * self.time_multiply
             self.ab_starfall = 1
+            self.ability()
     
     def fandance(self):
         if (self.ab_fourfold_feather>0 and self.ngc>0): 
@@ -988,13 +989,15 @@ class Machinist(Character):
         self.tick_per_act = 60
         
         self.global_cooldown=0
-        self.gc = f.f_gc(spd)*self.time_multiply
+        self.gc = f.f_gc(spd) * self.time_multiply
         
         self.battery = 0
         self.heat = 0
         
         self.initialize_cooldown()
         self.initialize_buff()
+        
+        self.event_log = deque()
     
     def initialize_cooldown(self):
         self.cool_drill = 0
@@ -1008,26 +1011,34 @@ class Machinist(Character):
         self.ab_reassemble = 2
         self.ab_gaussround = 3
         self.ab_ricochet = 3
+        self.queen_cool = 0
         
     def initialize_buff(self):
         self.buff_reassemble = 0
         self.buff_hypercharge = 0
+        self.wildfire_left = 0
         
     def drill(self):
+        if self.cool_drill<self.gc:
+            self.tick(int(self.cool_drill))
+            
         if self.cool_drill==0:
             if self.buff_reassemble>0:
-                dmg = self.calculate_dmg(580, 'Drill', 1, 1)
+                dmg = self.calculate_dmg(580, 'Drill', fix_cr = 1, fix_dh = 1)
                 self.buff_reassemble = 0
             else:
                 dmg = self.calculate_dmg(580, 'Drill')
             self.cool_drill = self.gc * 8
+            self.weapon_skill()
             return dmg
         
     def airanchor(self):
+        if self.cool_airanchor<self.gc:
+            self.tick(int(self.cool_airanchor))
+        
         if self.cool_airanchor==0:
-            
             if self.buff_reassemble>0:
-                dmg = self.calculate_dmg(580, 'Air Anchor', 1, 1)
+                dmg = self.calculate_dmg(580, 'Air Anchor',  fix_cr = 1, fix_dh = 1)
                 self.buff_reassemble = 0
             else:
                 dmg = self.calculate_dmg(580, 'Air Anchor')
@@ -1035,12 +1046,16 @@ class Machinist(Character):
             self.battery += 20
             if self.battery>100:
                 self.battery = 100
+            self.weapon_skill()
             return dmg
         
     def chainsaw(self):
+        if self.cool_chainsaw<self.gc:
+            self.tick(int(self.cool_chainsaw))
+        
         if self.cool_chainsaw==0:
             if self.buff_reassemble>0:
-                dmg = self.calculate_dmg(580, 'Chainsaw',1,1)
+                dmg = self.calculate_dmg(580, 'Chainsaw', fix_cr = 1, fix_dh = 1)
                 self.buff_reassemble = 0
             else:
                 dmg = self.calculate_dmg(580, 'Chainsaw')
@@ -1049,6 +1064,7 @@ class Machinist(Character):
             self.battery += 20
             if self.battery>100:
                 self.battery = 100
+            self.weapon_skill()
             return dmg
         
     def gaussround(self):
@@ -1057,6 +1073,7 @@ class Machinist(Character):
             if self.ab_gaussround==3:
                 self.cool_gaussround = 30 * self.time_multiply
             self.ab_gaussround -= 1
+            self.ability()
             return dmg
             
     def ricochet(self):
@@ -1065,6 +1082,7 @@ class Machinist(Character):
             if self.ab_ricochet==3:
                 self.cool_ricochet = 30 * self.time_multiply
             self.ab_ricochet -= 1
+            self.ability()
             return dmg
         
     def reassemble(self):
@@ -1073,18 +1091,19 @@ class Machinist(Character):
             if self.ab_reassemble ==2:
                 self.cool_reassemble = 55 * self.time_multiply
             self.ab_reassemble-=1
+            self.ability()
     
     def heatblast(self):
-        if self.global_cooldown>0:
-            while self.global_cooldown>0:
-                self.tick()
-        
-        self.ngc = 1
-        self.global_cooldown = 1.5 * self.time_multiply
-        dmg = self.calculate_dmg(200,'Heatblast')
-        self.cool_gaussround -= 15 * self.time_multiply
-        self.cool_ricochet -= 15 * self.time_multiply
-        return dmg
+        if self.buff_hypercharge>0:
+            if self.global_cooldown>0:
+                while self.global_cooldown>0:
+                    self.tick()
+            
+            dmg = self.calculate_dmg(200,'Heatblast')
+            self.cool_gaussround -= 15 * self.time_multiply
+            self.cool_ricochet -= 15 * self.time_multiply
+            self.weapon_skill(1.5)
+            return dmg
     
     def splitshot(self):
         if self.global_cooldown>0:
@@ -1104,7 +1123,10 @@ class Machinist(Character):
         if self.global_cooldown>0:
             while self.global_cooldown>0:
                 self.tick()
-        dmg = self.calculate_dmg(280, 'Slug Shot')
+        if self.combo ==1:
+            dmg = self.calculate_dmg(280, 'Slug Shot')
+        else:
+            dmg = self.calculate_dmg(120, 'Slug Shot')
         self.heat +=5
         
         if self.heat>100:
@@ -1117,15 +1139,17 @@ class Machinist(Character):
         if self.global_cooldown>0:
             while self.global_cooldown>0:
                 self.tick()
-        dmg = self.calculate_dmg(360, 'Slug Shot')
-        self.heat +=10
-        
-        if self.heat>100:
-            self.heat = 100
-        self.battery += 10
-        
-        if self.battery>100:
-            self.battery = 100
+                
+        if self.combo ==2:
+            dmg = self.calculate_dmg(360, 'Clean Shot')
+            self.heat +=10
+            if self.heat>100:
+                self.heat = 100
+            self.battery += 10
+            if self.battery>100:
+                self.battery = 100
+        else:
+            dmg = self.calculate_dmg(110, 'Clean Shot')
         
         self.weapon_skill()
         self.combo = 0
@@ -1134,17 +1158,36 @@ class Machinist(Character):
     def automaton_queen(self):
         self.queen_battery = self.battery
         self.battery = 0
-        self.queen_punch = self.queen_battery * 0.1
+        self.queen_punch = int(self.queen_battery * 0.1)
         self.queen_pilebunker_potency = self.queen_battery * 0.01 * 680
         self.queen_collider_potency = self.queen_battery * 0.01 * 780
+        self.queen_cool = 6 * self.time_multiply
         self.ability()
+
+    def queen_armpunch(self):
+        self.queen_cool = int(1.56 * self.time_multiply)
+        dmg = self.calculate_dmg(120, 'Queen ArmPunch')
+        self.queen_punch -=1
+        return dmg
+
+    def queen_pilebunker(self):
+        self.queen_cool = int(2.05 * self.time_multiply)
+        dmg = self.calculate_dmg(self.queen_pilebunker_potency, 'Queen Pilebunker')
+        self.queen_pilebunker_potency = 0
+        return dmg
+
+    def queen_collider(self):
+        dmg = self.calculate_dmg(self.queen_collider_potency, 'Queen Collider')
+        self.queen_collider_potency = 0
+        return dmg
         
     def wildfire(self):
         self.wildfire_left = 10 * self.time_multiply
         self.cool_wildfire = 120 * self.time_multiply
+        self.ability()
     
     def detonator(self, hit = 6):
-        dmg = self.calculate_dmg(220 * hit, 'Wildfire')
+        dmg = self.calculate_dmg(220 * hit, 'Wildfire', buff_cr = -1, buff_dh = -1)
         return dmg
     
     def barrelstabilizer(self):
@@ -1152,10 +1195,12 @@ class Machinist(Character):
         if self.heat>100:
             self.heat =100
         self.cool_barrelstabilizer = 120 * self.time_multiply
+        self.ability()
         
     def hypercharge(self):
-        self.buff_hypercharge = 8*self.time_multiply
+        self.buff_hypercharge = 8 * self.time_multiply
         self.cool_hypercharge = 10 * self.time_multiply
+        self.ability()
         
     def tick(self,iteration=1):
         for i in range(iteration):
@@ -1191,31 +1236,41 @@ class Machinist(Character):
                 self.cool_ricochet -= self.time_per_tick
             if (self.cool_ricochet <0 and self.ab_ricochet<3):
                 self.cool_ricochet += 30 * self.time_multiply
-                self.ab_gaussround += 1
+                self.ab_ricochet += 1
             
+            if self.queen_cool>0:
+                self.queen_cool -= self.time_per_tick
+                if self.queen_cool == 0:
+                    if self.queen_punch>0:
+                        self.queen_armpunch()
+                    elif self.queen_pilebunker_potency>0:
+                        self.queen_pilebunker()
+                    elif self.queen_collider_potency>0:
+                        self.queen_collider()
+                        
+                        
             self.buff_reassemble -= self.time_per_tick
             self.buff_hypercharge -= self.time_per_tick
             
             self.global_cooldown -= self.time_per_tick
             
-            self.wildfire_left -= self.time_per_tick
-            if self.wildfire_left==0:
-                self.detonator()
+            if self.wildfire_left>0:
+                self.wildfire_left -= self.time_per_tick
+                if self.wildfire_left==0:
+                    self.detonator()
             
             if self.tick_autoshot==0:
                 self.tick_autoshot = 3* self.time_multiply
                 self.auto_shot()
                 
-            if self.wildfire_left == 0:
-                self.detonator()
-                
             if self.elapsed > self.left_time:
                 self.done=1
+        
+    def extract_log(self):
+        df = pd.DataFrame(self.event_log,columns=['Skill', 'Type','Damage','Crit','Dhit','Time'])
+        return df
     
 if __name__=='__main__':
-
-
-
     #https://etro.gg/gearset/cec981af-25c7-4ffb-905e-3024411b797a
     period = 300
     cr = 2229

@@ -56,27 +56,6 @@ class Character():
         
         return int(dmg)
     
-    def calculate_DOT(self,potency,buff,pcr,pdh,skill_name):
-        d1 = potency*self.atk*f.f_det(self.dt)/100
-        d2 = d1 * self.spd*self.wd*self.jobmod
-        d3 = int(f.random_dmg(d2))
-        
-        is_crit, is_dh = False, False
-        if np.random.random()<pcr:
-            d3 = int(d3 * self.dcr)
-            is_crit = True
-        if np.random.random()<pdh:
-            d3 = int(d3*1.25)
-            is_dh = True
-        dmg = d3 * buff
-        
-        if self.print_log:
-            print('DOT',skill_name,'DOT', int(dmg), 'Crit:', is_crit, 'DirectHit:', is_dh, 'time: ', round(self.elapsed/self.time_multiply,2))
-        
-        self.event_log.append((skill_name, 'DOT',int(dmg), is_crit,is_dh, round(self.elapsed/self.time_multiply,3)))
-        
-        return dmg
-    
     def auto_shot(self):
         buff, pcr, pdh = self.check_buff()
         d = f.auto_dmg(self.dex,self.weapon, self.weapon_delay)
@@ -256,7 +235,7 @@ class Bard():
         if self.print_log:
             print(skill_name, int(dmg), 'Crit:', is_crit, 'DirectHit:', is_dh, 'time: ', round(self.elapsed/self.time_multiply,2))
             
-        self.event_log.append((skill_name, 'Direct', int(dmg), is_crit,is_dh, round(self.elapsed/self.time_multiply,3)))
+        self.record_log(skill_name, 'Direct',int(dmg),is_crit,is_dh)
         
         return int(dmg)
     
@@ -277,7 +256,7 @@ class Bard():
         if self.print_log:
             print('DOT',skill_name,'DOT', int(dmg), 'Crit:', is_crit, 'DirectHit:', is_dh, 'time: ', round(self.elapsed/self.time_multiply,2))
         
-        self.event_log.append((skill_name, 'DOT',int(dmg), is_crit,is_dh, round(self.elapsed/self.time_multiply,3)))
+        self.record_log(skill_name, 'DOT',int(dmg),is_crit,is_dh)
         
         return dmg
     
@@ -297,7 +276,7 @@ class Bard():
         if self.print_log:
             print('AutoShot', int(dmg), 'Crit:', is_crit, 'DirectHit:', is_dh, 'time: ', round(self.elapsed/self.time_multiply,2))
         
-        self.event_log.append(('Autoshot','Auto', int(dmg), is_crit,is_dh, round(self.elapsed/self.time_multiply,3)))
+        self.record_log('Autoshot', 'Auto',int(dmg),is_crit,is_dh)
         
         return dmg
     
@@ -331,10 +310,11 @@ class Bard():
                 self.tick()
         if self.soul>20:
             dmg = self.calculate_dmg(self.soul*5,'Apex Arrow')
-            self.soul = 0
-            self.weapon_skill()
             if self.soul>80:
                 self.available_blast=1
+            self.soul = 0
+            self.weapon_skill()
+            
             return dmg
         
     def blast_arrow(self):
@@ -343,6 +323,7 @@ class Bard():
                 self.tick()
         if self.available_blast:
             dmg = self.calculate_dmg(600,'Blast Arrow')
+            self.available_blast = 0
             self.weapon_skill()
             return dmg
         
@@ -702,8 +683,34 @@ class Bard():
             self.tick(cooldown)
         
     def extract_log(self):
-        df = pd.DataFrame(self.event_log,columns=['Skill', 'Type','Damage','Crit','Dhit','Time'])
+        df = pd.DataFrame(self.event_log,columns=['Skill', 'Type','Damage','Crit','Dhit','Time','Raging','Radient','Battle','Song'])
         return df
+    
+    def record_log(self,skill_name,dmg_type,dmg,is_crit,is_dh):
+        if self.buff_raging>0:
+            raging = 1
+        else:
+            raging = 0
+            
+        if self.buff_radient>0:
+            radient = 1
+        else:
+            radient = 0
+        if self.buff_battle>0:
+            battle = 1
+        else:
+            battle = 0
+            
+        if self.buff_wanderer>0:
+            song = 1
+        elif self.buff_mage>0:
+            song = 2
+        elif self.buff_army>0:
+            song = 3
+        else:
+            song = 0
+            
+        self.event_log.append((skill_name, dmg_type,int(dmg), is_crit,is_dh, round(self.elapsed/self.time_multiply,3),raging,radient,battle,song))
 
 class Dancer(Character):
     def __init__(self,cr,dh,dt,stat,wd,spd,period, print_log =0, opening = -15):
@@ -1125,8 +1132,11 @@ class Machinist(Character):
         return dmg
     
     def automaton_queen(self):
-        self.queen_left = self.battery * 0.2 * self.time_multiply
+        self.queen_battery = self.battery
         self.battery = 0
+        self.queen_punch = self.queen_battery * 0.1
+        self.queen_pilebunker_potency = self.queen_battery * 0.01 * 680
+        self.queen_collider_potency = self.queen_battery * 0.01 * 780
         self.ability()
         
     def wildfire(self):

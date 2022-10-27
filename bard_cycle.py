@@ -111,7 +111,7 @@ def ngc_in_mage(agent):
     elif agent.available_blood>0:
         agent.blood()
         
-    if agent.buff_mage < 15 * agent.time_multiply:
+    if agent.buff_mage < 12 * agent.time_multiply:
         agent.army_paeon()
         
 def gc_in_army(agent):
@@ -152,11 +152,11 @@ if __name__=='__main__':
     spd = 479
     stat = 2574
     
-    cr = 2028
-    dt = 1526
-    dh = 1284
-    spd = 763
-    stat = 2551
+    #cr = 2028
+    #dt = 1526
+    #dh = 1284
+    #spd = 763
+    #stat = 2551
     
     wd = 120
     weapon_delay = 3.04
@@ -171,14 +171,9 @@ if __name__=='__main__':
     bard = job.Bard(cr,dh,dt,stat,wd,spd,period,print_log = 0)
     
     opening(bard)
-    
-    number_burst = 0
-    
     while not bard.done:
         if bard.cool_wanderer==0:
             burst(bard)
-            number_burst +=1
-        
         GC(bard)
         NGC(bard)
         NGC(bard)
@@ -186,7 +181,6 @@ if __name__=='__main__':
     act_log = bard.extract_log()
     dmg_log = act_log['Damage'].to_numpy()
     print(np.sum(dmg_log)/(bard.elapsed*0.01))
-    print(number_burst)
     
     '''
     while not bard.buff_army>0:

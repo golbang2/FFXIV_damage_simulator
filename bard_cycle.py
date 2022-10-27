@@ -8,6 +8,7 @@ Created on Mon Sep 12 16:26:50 2022
 import range_job as job
 import functions as f
 import time
+import numpy as np
 
 def opening(agent):
     agent.stormbite()
@@ -75,6 +76,8 @@ def gc_in_wanderer(agent):
 def ngc_in_wanderer(agent):
     if agent.stack_wanderer==3:
         agent.pitch()
+    elif agent.cool_barrage == 0:
+        agent.barrage()
     elif agent.cool_sidewinder<=0:
         agent.sidewinder()
     elif agent.cool_empyreal<=0:
@@ -118,8 +121,6 @@ def gc_in_army(agent):
         agent.burst_shot()
         
 def ngc_in_army(agent):
-    if (agent.cool_wanderer == 0 and agent.cool_raging == 0):
-        agent.wanderer_minuet()
     if (agent.available_blood>2 and agent.cool_blood<agent.gc_ap):
         agent.blood()
     if agent.cool_empyreal<=0:
@@ -144,12 +145,19 @@ def NGC(agent):
         
 if __name__=='__main__':
     #https://etro.gg/gearset/cec981af-25c7-4ffb-905e-3024411b797a
-    period = 300
+    period = 3000
     cr = 2229
     dt = 1381
     dh = 1662
     spd = 479
     stat = 2574
+    
+    cr = 2028
+    dt = 1526
+    dh = 1284
+    spd = 763
+    stat = 2551
+    
     wd = 120
     weapon_delay = 3.04
 
@@ -160,16 +168,33 @@ if __name__=='__main__':
     pcr,dcr = f.f_crit(cr)
     pdh = f.f_dh(dh)
     
-    bard = job.Bard(cr,dh,dt,stat,wd,spd,period,print_log = 1)
-    '''
+    bard = job.Bard(cr,dh,dt,stat,wd,spd,period,print_log = 0)
+    
     opening(bard)
-
+    
+    number_burst = 0
+    
     while not bard.done:
-        if bard.cool_wanderer<=0:
+        if bard.cool_wanderer==0:
             burst(bard)
+            number_burst +=1
+        
         GC(bard)
         NGC(bard)
         NGC(bard)
     
     act_log = bard.extract_log()
+    dmg_log = act_log['Damage'].to_numpy()
+    print(np.sum(dmg_log)/(bard.elapsed*0.01))
+    print(number_burst)
+    
+    '''
+    while not bard.buff_army>0:
+        GC(bard)
+        NGC(bard)
+        NGC(bard)
+        
+    act_log = bard.extract_log()
+    dmg_log = act_log['Damage'].to_numpy()
+    print(np.sum(dmg_log)/(bard.elapsed*0.01))
     '''

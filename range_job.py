@@ -721,7 +721,7 @@ class Bard():
         self.event_log.append((skill_name, dmg_type,int(dmg), int(is_crit),int(is_dh),raging,radient,battle,song, round(self.elapsed/self.time_multiply,3)))
 
 class Dancer(Character):
-    def __init__(self,cr,dh,dt,stat,wd,spd,period, print_log =0, opening = -15):
+    def __init__(self,cr,dh,dt,stat,wd,spd,period, print_log =0):
         super().__init__(cr,dh,dt,stat,wd,spd,period,print_log)
         
         self.pcr,self.dcr = f.f_crit(cr)
@@ -735,16 +735,12 @@ class Dancer(Character):
         self.jobmod = 1.2*1.1
         self.weapon_delay = 3.12
         self.left_time = period
-        self.elapsed = opening
+        self.elapsed = 0
         self.tick_autoshot = 0
-    
-        self.buff_ = 0
-        self.buff_standard = 0
-        self.buff_technical = 0
         
-        self.ab_silken_symmetry = 0
-        self.ab_fourfold_feather = 0
-        self.ab_silken_flow = 0
+        self.initialize_cooldown()
+        self.initialize_buff()
+        self.check_buff()
         
         self.esprit = 0
         
@@ -754,62 +750,83 @@ class Dancer(Character):
         self.tick_per_act = 60
         
         self.gc = f.f_gc(spd)*self.time_multiply
-        self.tick_esprit = self.gc
+        self.tick_esprit = 2.5 * self.time_multiply
         
         self.event_log = deque()
         
+    def initialize_cooldown(self):
+        self.cool_devilment = 0
+        self.cool_flourish = 0 
+        self.cool_standard = 0
+        self.cool_technical = 0
         
-    def check_buff(self):
-        pcr = self.pcr
-        pdh = self.pdh
-        buff = 1.
+        self.ab_reverse_cascade = 0
+        self.ab_fountainfall = 0
+        self.ab_fourfold_feather = 0
+        self.ab_fourth = 0
+        self.ab_third = 0
+        self.ab_tillana = 0
+        self.ab_starfall = 0
         
-        if self.buff_devilment>0:
-            pcr +=0.2
-            pdh +=0.2
+    def initialize_buff(self):
+        self.buff_standard = 0
+        self.buff_technical = 0
+        self.buff_devilment = 0
+        
+    def check_buff(self):             
+        self.admg = 1.
+        self.acr = 0
+        self.adh = 0
         
         if self.buff_standard>0:
-            buff *=1.05
+            self.admg *=1.05
         if self.buff_technical>0:
-            buff *=1.05
-        
-        return buff, pcr, pdh
+            self.admg *=1.05
+            
+        if self.buff_devilment>0:
+            self.acr =0.2
+            self.adh =0.2
     
     def cascade(self):
         if self.global_cooldown>0:
             while self.global_cooldown>0:
                 self.tick()
                 
-        dmg = self.calculate_dmg(220, 'Cascade')
+        dmg = self.calculate_dmg(220, 'Cascade' , self.admg, self.acr , self.adh)
         if np.random.random()<0.5:
             self.ab_reverse_cascade = 1
             if self.print_log:
                 print('Reverse Cascade Available')
         self.esprit +=5
         self.weapon_skill()
+        self.combo = 1
         return dmg
         
     def fountain(self):
         if self.global_cooldown>0:
             while self.global_cooldown>0:
                 self.tick()
-                
-        dmg = self.calculate_dmg(280, 'Fountain')
-        if np.random.random()<0.5:
-            self.ab_fountainfall = 1
-            if self.print_log:
-                print('Fountainfall Available')
+            
+        if self.combo == 1:
+            dmg = self.calculate_dmg(280, 'Fountain', self.admg, self.acr , self.adh)
+            if np.random.random()<0.5:
+                self.ab_fountainfall = 1
+                if self.print_log:
+                    print('Fountainfall Available')
+        else:
+            dmg = self.calculate_dmg(100, 'Fountain', self.admg, self.acr , self.adh)
+
         self.esprit +=5
         self.weapon_skill()
         return dmg
     
     def reverse_cascade(self):
-        if self.ab_reverse_cascade:
+        if self.ab_reverse_cascade>0:
             if self.global_cooldown>0:
                 while self.global_cooldown>0:
                     self.tick()
-                    
-            dmg = self.calculate_dmg(280, 'Reverse Cascade')
+            self.ab_reverse_cascade-= 1
+            dmg = self.calculate_dmg(280, 'Reverse Cascade', self.admg, self.acr , self.adh)
             if np.random.random()<0.5:
                 self.ab_fourfold_feather += 1
                 if self.print_log:
@@ -819,17 +836,17 @@ class Dancer(Character):
             return dmg
         
     def fountainfall(self):
-        if self.ab_fountainfall:
+        if self.ab_fountainfall>0:
             if self.global_cooldown>0:
                 while self.global_cooldown>0:
                     self.tick()
-                    
-            dmg = self.calculate_dmg(340, 'fountainfall')
+            self.ab_fountainfall -= 1
+            dmg = self.calculate_dmg(340, 'fountainfall', self.admg, self.acr , self.adh)
             if np.random.random()<0.5:
                 self.ab_fourfold_feather += 1
                 if self.print_log:
                     print('got Fourfold Feather')
-                    
+
             self.esprit +=10
             self.weapon_skill()
             return dmg
@@ -842,14 +859,16 @@ class Dancer(Character):
             self.cool_standard = 30* self.time_multiply
             self.tick(int(3.5*self.time_multiply))
             self.buff_standard = 60 * self.time_multiply
-            dmg = self.calculate_dmg(720, 'Standard Finish')
+            self.check_buff()
+            dmg = self.calculate_dmg(720, 'Standard Finish', self.admg, self.acr , self.adh)
             self.weapon_skill(1.5)
             return dmg
             
     def opening_standard_finish(self):
-        self.cool_standard = 15* self.time_multiply
+        self.cool_standard = 16* self.time_multiply
         self.buff_standard = 60 * self.time_multiply
-        dmg = self.calculate_dmg(720, 'Standard Finish')
+        self.check_buff()
+        dmg = self.calculate_dmg(720, 'Standard Finish', self.admg, self.acr , self.adh)
         self.weapon_skill(1.5)
         return dmg
             
@@ -861,8 +880,9 @@ class Dancer(Character):
             self.cool_technical = 120 * self.time_multiply
             self.tick(int(5.5*self.time_multiply))
             self.buff_technical = 15 * self.time_multiply
+            self.check_buff()
             self.ab_tillana = 1
-            dmg = self.calculate_dmg(1200,'Technical Finish')
+            dmg = self.calculate_dmg(1200,'Technical Finish', self.admg, self.acr , self.adh)
             self.weapon_skill(1.5)
             return dmg
         
@@ -872,7 +892,7 @@ class Dancer(Character):
                 while self.global_cooldown>0:
                     self.tick()
             self.esprit -=50
-            dmg = self.calculate_dmg(480, 'Saber Dance')
+            dmg = self.calculate_dmg(480, 'Saber Dance', self.admg, self.acr , self.adh)
             self.weapon_skill()
             return dmg
             
@@ -881,7 +901,7 @@ class Dancer(Character):
             if self.global_cooldown>0:
                 while self.global_cooldown>0:
                     self.tick()
-            dmg = self.calculate_dmg(360)
+            dmg = self.calculate_dmg(360, 'Tillana', self.admg, self.acr , self.adh)
             self.buff_standard = 60 * self.time_multiply
             self.ab_tillana = 0
             self.weapon_skill(1.5)
@@ -894,14 +914,14 @@ class Dancer(Character):
                     self.tick()
                     
             self.ab_starfall = 0
-            dmg = self.calculate_dmg(600,'Starfall Dance',1,1)
+            dmg = self.calculate_dmg(600,'Starfall Dance',fix_cr=1, fix_dh = 1)
             self.weapon_skill()
             return dmg
     
     def flourish(self):
         if (self.cool_flourish<=0 and self.ngc>0):
-            self.ab_fountainfall = 1
-            self.ab_reverse_cascade = 1
+            self.ab_fountainfall += 1
+            self.ab_reverse_cascade += 1
             self.ab_third = 1
             self.ab_fourth = 1
             self.cool_flourish = 60 * self.time_multiply
@@ -916,7 +936,7 @@ class Dancer(Character):
     
     def fandance(self):
         if (self.ab_fourfold_feather>0 and self.ngc>0): 
-            dmg = self.calculate_dmg(150,'First FanDance')
+            dmg = self.calculate_dmg(150,'First FanDance', self.admg, self.acr , self.adh)
             self.ab_fourfold_feather-=1
             if np.random.random()<0.5:
                 self.ab_third = 1
@@ -927,14 +947,14 @@ class Dancer(Character):
     
     def fandance_third(self):
         if (self.ab_third>0 and self.ngc>0): 
-            dmg = self.calculate_dmg(200,'Third FanDance')
+            dmg = self.calculate_dmg(200,'Third FanDance', self.admg, self.acr , self.adh)
             self.ab_third = 0
             self.ability()
             return dmg
     
     def fandance_fourth(self):
         if (self.ab_fourth>0 and self.ngc>0):
-            dmg = self.calculate_dmg(300,'Fourth FanDance')
+            dmg = self.calculate_dmg(300,'Fourth FanDance', self.admg, self.acr , self.adh)
             self.ab_fourth = 0
             self.ability()
             return dmg
@@ -951,16 +971,24 @@ class Dancer(Character):
             self.cool_technical -= self.time_per_tick
             
             self.buff_devilment -= self.time_per_tick
+            if self.buff_devilment == 0:
+                self.check_buff()
             self.buff_standard -= self.time_per_tick
+            if self.buff_standard == 0:
+                self.check_buff()
             self.buff_technical -= self.time_per_tick
+            if self.buff_technical == 0:
+                self.check_buff()
             
             self.global_cooldown -= self.time_per_tick
             
+            self.tick_esprit -= self.time_per_tick
             if self.tick_esprit <=0:
-                self.tick_esprit = self.gc
-                self.esprit += 2.5
+                self.tick_esprit = 2.5 * self.time_multiply
+                if np.random.random()<0.5:
+                    self.esprit += 5
             
-            if self.tick_autoshot<0.001:
+            if self.tick_autoshot==0:
                 self.tick_autoshot = 3* self.time_multiply
                 self.auto_shot()
                 

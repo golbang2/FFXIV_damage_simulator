@@ -9,6 +9,21 @@ import range_job as job
 import functions as f
 import time
 
+def opening(dancer):
+    dancer.opening_standard_finish()
+    dancer.technical_finish()
+    dancer.devilment()
+    dancer.starfall_dance()
+    dancer.flourish()
+    dancer.fandance_third()
+    dancer.tillana()
+    dancer.fandance_fourth()
+    if dancer.esprit>50:
+        dancer.saber_dance()
+    else:
+        dancer.fountainfall()
+    dancer.standard_finish()
+
 
 if __name__=='__main__':
     #https://etro.gg/gearset/fd333e44-0f90-42a6-a070-044b332bb54e
@@ -29,3 +44,5 @@ if __name__=='__main__':
     pdh = f.f_dh(dh)
     
     dancer = job.Dancer(cr,dh,dt,dex,wd,spd,period,print_log = 1)
+    
+    opening(dancer)

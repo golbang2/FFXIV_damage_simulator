@@ -10,142 +10,142 @@ import functions as f
 import time
 import numpy as np
 
-def opening(agent):
-    agent.stormbite()
-    agent.wanderer_minuet()
-    agent.raging()
-    agent.causticbite()
-    agent.empyreal()
-    agent.blood()
-    agent.burst_shot()
-    agent.radient()
-    agent.battle()
-    agent.burst_shot()
-    if agent.available_straight:
-        agent.sidewinder()
-        ngc_in_wanderer(agent)
-        agent.burst_shot()
-        agent.barrage()
-        agent.burst_shot()
-        agent.burst_shot()
-        agent.empyreal()
-        agent.iron_jaws()
+def opening(bard):
+    bard.stormbite()
+    bard.wanderer_minuet()
+    bard.raging()
+    bard.causticbite()
+    bard.empyreal()
+    bard.blood()
+    bard.burst_shot()
+    bard.radient()
+    bard.battle()
+    bard.burst_shot()
+    if bard.available_straight:
+        bard.sidewinder()
+        ngc_in_wanderer(bard)
+        bard.burst_shot()
+        bard.barrage()
+        bard.burst_shot()
+        bard.burst_shot()
+        bard.empyreal()
+        bard.iron_jaws()
     else:
-        agent.barrage()
-        ngc_in_wanderer(agent)
-        agent.burst_shot()
-        agent.sidewinder()
-        ngc_in_wanderer(agent)
-        agent.burst_shot()
-        ngc_in_wanderer(agent)
-        ngc_in_wanderer(agent)
-        agent.burst_shot()
-        ngc_in_wanderer(agent)
-        ngc_in_wanderer(agent)
-        agent.burst_shot()
-        ngc_in_wanderer(agent)
-        ngc_in_wanderer(agent)
-        agent.empyreal()
-        agent.iron_jaws()
+        bard.barrage()
+        ngc_in_wanderer(bard)
+        bard.burst_shot()
+        bard.sidewinder()
+        ngc_in_wanderer(bard)
+        bard.burst_shot()
+        ngc_in_wanderer(bard)
+        ngc_in_wanderer(bard)
+        bard.burst_shot()
+        ngc_in_wanderer(bard)
+        ngc_in_wanderer(bard)
+        bard.burst_shot()
+        ngc_in_wanderer(bard)
+        ngc_in_wanderer(bard)
+        bard.empyreal()
+        bard.iron_jaws()
 
-def burst(agent):
-    gc_in_wanderer(agent)
-    agent.wanderer_minuet()
-    agent.raging()
-    gc_in_wanderer(agent)
-    ngc_in_wanderer(agent)
-    ngc_in_wanderer(agent)
-    gc_in_wanderer(agent)
-    agent.radient()
-    agent.battle()
-    if agent.dot_caustic< 38 * agent.time_multiply:
-        agent.iron_jaws()
+def burst(bard):
+    gc_in_wanderer(bard)
+    bard.wanderer_minuet()
+    bard.raging()
+    gc_in_wanderer(bard)
+    ngc_in_wanderer(bard)
+    ngc_in_wanderer(bard)
+    gc_in_wanderer(bard)
+    bard.radient()
+    bard.battle()
+    if bard.dot_caustic< 38 * bard.time_multiply:
+        bard.iron_jaws()
     else:
-        gc_in_wanderer(agent)
+        gc_in_wanderer(bard)
 
-def gc_in_wanderer(agent):
-    if (agent.dot_caustic < agent.gc_ap or agent.dot_storm< agent.gc_ap):
-        agent.iron_jaws()
-    elif agent.available_blast:
-        agent.blast_arrow()
-    elif (agent.buff_raging >0 and agent.buff_radient>0 and agent.buff_battle>0 and agent.soul>80):
-        agent.apex_arrow()
+def gc_in_wanderer(bard):
+    if (bard.dot_caustic < bard.gc_ap or bard.dot_storm< bard.gc_ap):
+        bard.iron_jaws()
+    elif bard.available_blast:
+        bard.blast_arrow()
+    elif (bard.buff_raging >0 and bard.buff_radient>0 and bard.buff_battle>0 and bard.soul>80):
+        bard.apex_arrow()
     else:
-        agent.burst_shot()
+        bard.burst_shot()
 
-def ngc_in_wanderer(agent):
-    if agent.stack_wanderer==3:
-        agent.pitch()
-    elif agent.cool_barrage == 0:
-        agent.barrage()
-    elif agent.cool_sidewinder<=0:
-        agent.sidewinder()
-    elif agent.cool_empyreal<=0:
-        agent.empyreal()
-    elif agent.available_blood>0:
-        agent.blood()
+def ngc_in_wanderer(bard):
+    if bard.stack_wanderer==3:
+        bard.pitch()
+    elif bard.cool_barrage == 0:
+        bard.barrage()
+    elif bard.cool_sidewinder<=0:
+        bard.sidewinder()
+    elif bard.cool_empyreal<=0:
+        bard.empyreal()
+    elif bard.available_blood>0:
+        bard.blood()
     
-    if agent.buff_wanderer< 3 * agent.time_multiply:
-        if agent.stack_wanderer>0:
-            agent.pitch()
+    if bard.buff_wanderer< 3 * bard.time_multiply:
+        if bard.stack_wanderer>0:
+            bard.pitch()
         else:
-            agent.mage_ballad()
+            bard.mage_ballad()
         
-def gc_in_mage(agent):
-    if (agent.dot_caustic < agent.gc_ap or agent.dot_storm < agent.gc_ap):
-        agent.iron_jaws()
-    elif (agent.soul==100 and agent.buff_mage > 15 * agent.time_multiply):
-        agent.apex_arrow()
-    elif (agent.soul>80 and agent.buff_mage > 18 * agent.time_multiply and agent.buff_mage<21 * agent.time_multiply):
-        agent.apex_arrow()
-    elif agent.available_blast:
-        agent.blast_arrow()
+def gc_in_mage(bard):
+    if (bard.dot_caustic < bard.gc_ap or bard.dot_storm < bard.gc_ap):
+        bard.iron_jaws()
+    elif (bard.soul==100 and bard.buff_mage > 15 * bard.time_multiply):
+        bard.apex_arrow()
+    elif (bard.soul>80 and bard.buff_mage > 18 * bard.time_multiply and bard.buff_mage<21 * bard.time_multiply):
+        bard.apex_arrow()
+    elif bard.available_blast:
+        bard.blast_arrow()
     else:
-        agent.burst_shot()
+        bard.burst_shot()
         
-def ngc_in_mage(agent):
-    if agent.cool_sidewinder<=0:
-        agent.sidewinder()
-    elif agent.cool_empyreal<=0:
-        agent.empyreal()
-    elif agent.available_blood>0:
-        agent.blood()
+def ngc_in_mage(bard):
+    if bard.cool_sidewinder<=0:
+        bard.sidewinder()
+    elif bard.cool_empyreal<=0:
+        bard.empyreal()
+    elif bard.available_blood>0:
+        bard.blood()
         
-    if agent.buff_mage < 12 * agent.time_multiply:
-        agent.army_paeon()
+    if bard.buff_mage < 12 * bard.time_multiply:
+        bard.army_paeon()
         
-def gc_in_army(agent):
-    if (agent.dot_caustic< agent.gc_ap or agent.dot_storm< agent.gc_ap):
-        agent.iron_jaws()
+def gc_in_army(bard):
+    if (bard.dot_caustic< bard.gc_ap or bard.dot_storm< bard.gc_ap):
+        bard.iron_jaws()
     else:
-        agent.burst_shot()
+        bard.burst_shot()
         
-def ngc_in_army(agent):
-    if (agent.available_blood>2 and agent.cool_blood<agent.gc_ap):
-        agent.blood()
-    if agent.cool_empyreal<=0:
-        agent.empyreal()
+def ngc_in_army(bard):
+    if (bard.available_blood>2 and bard.cool_blood<bard.gc_ap):
+        bard.blood()
+    if bard.cool_empyreal<=0:
+        bard.empyreal()
         
-def GC(agent):
-    if agent.buff_wanderer>0:
-        gc_in_wanderer(agent)
-    elif agent.buff_mage>0:
-        gc_in_mage(agent)
+def GC(bard):
+    if bard.buff_wanderer>0:
+        gc_in_wanderer(bard)
+    elif bard.buff_mage>0:
+        gc_in_mage(bard)
     else:
-        gc_in_army(agent)
+        gc_in_army(bard)
         
-def NGC(agent):
-    if agent.buff_wanderer>0:
-        ngc_in_wanderer(agent)
-    elif agent.buff_mage>0:
-        ngc_in_mage(agent)
-    elif agent.buff_army>0:
-        ngc_in_army(agent)
+def NGC(bard):
+    if bard.buff_wanderer>0:
+        ngc_in_wanderer(bard)
+    elif bard.buff_mage>0:
+        ngc_in_mage(bard)
+    elif bard.buff_army>0:
+        ngc_in_army(bard)
 
         
 if __name__=='__main__':
     #https://etro.gg/gearset/cec981af-25c7-4ffb-905e-3024411b797a
-    period = 3000
+    period = 410
     cr = 2229
     dt = 1381
     dh = 1662
@@ -168,7 +168,13 @@ if __name__=='__main__':
     pcr,dcr = f.f_crit(cr)
     pdh = f.f_dh(dh)
     
+    dps = 0
+    
+    #while dps<7200:
     bard = job.Bard(cr,dh,dt,stat,wd,spd,period,print_log = 0)
+    
+    bard.buff_potion = 30*bard.time_multiply
+    potion = 0
     
     opening(bard)
     while not bard.done:
@@ -177,10 +183,14 @@ if __name__=='__main__':
         GC(bard)
         NGC(bard)
         NGC(bard)
+        if (bard.elapsed>=360 and potion==0):
+            bard.buff_potion = 30 * bard.time_multiply
+            potion = 1
     
     act_log = bard.extract_log()
     dmg_log = act_log['Damage'].to_numpy()
-    print(np.sum(dmg_log)/(bard.elapsed*0.01))
+    dps = np.sum(dmg_log)/(bard.elapsed*0.01)
+    print(dps)
     
     '''
     while not bard.buff_army>0:

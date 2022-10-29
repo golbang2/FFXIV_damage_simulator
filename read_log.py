@@ -9,6 +9,9 @@ import numpy as np
 import pandas as pd
 import re
 
+def burst_time(t):
+    return (t//120 * 20) + np.min((t%120,20))
+
 class read_mach_log():
     def __init__(self, path = "D:/game_plan/FFXIV/FF Logs - Combat Analysis for FF1.csv", gc = 2.5):
         self.activation_log = pd.read_csv(path)

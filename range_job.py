@@ -104,6 +104,9 @@ class Character():
         left_time = self.global_cooldown - self.tick_per_act * self.ngc
         if cooldown < left_time:
             self.tick(cooldown)
+            
+
+                
     
 class Bard():
     def __init__(self,cr,dh,dt,stat,wd,spd,period, print_log =0):
@@ -124,17 +127,17 @@ class Bard():
         self.tick_autoshot = 0
         self.ethos = 0
         
+        self.time_multiply = 100
+        self.time_per_tick = 1
+        self.tick_per_act = 60
+        
         self.initialize_buff()
         self.initialize_dot()
         self.initialize_skill()
         
         self.global_cooldown=0
         
-        self.print_log = print_log
-        self.time_multiply = 100
-        self.time_per_tick = 1
-        self.tick_per_act = 60
-        
+        self.print_log = print_log        
         self.event_log = deque()
         
         self.gc = f.f_gc(spd)*self.time_multiply
@@ -153,6 +156,7 @@ class Bard():
         self.cool_blood = 0 
         self.cool_empyreal = 0
         self.cool_sidewinder = 0
+        self.cool_potion = 270 * self.time_multiply
         
         self.available_straight = 0
         self.available_blast = 0
@@ -173,6 +177,8 @@ class Bard():
         self.buff_mage = 0
         self.buff_wanderer = 0
         self.buff_army_muse = 0
+        
+        self.buff_potion = 28.5 * self.time_multiply
         
     def initialize_dot(self):
         self.dot_storm = 0
@@ -223,6 +229,8 @@ class Bard():
             buff *=115 *0.01
         if self.buff_radient>0:
             buff *=(100+self.radient_coda*2) * 0.01
+        if self.buff_potion>0:
+            buff *=105*0.01
         return buff, pcr, pdh
         
     def calculate_dmg(self,potency,skill_name):
@@ -243,7 +251,7 @@ class Bard():
         if self.print_log:
             print(skill_name, int(dmg), 'Crit:', is_crit, 'DirectHit:', is_dh, 'time: ', round(self.elapsed/self.time_multiply,2))
             
-        self.record_log(skill_name, 'Direct',int(dmg),is_crit,is_dh)
+        self.record_log(skill_name, 'Direct',int(dmg),is_crit,is_dh,self.dot_caustic)
         
         return int(dmg)
     
@@ -264,7 +272,7 @@ class Bard():
         if self.print_log:
             print('DOT',skill_name,'DOT', int(dmg), 'Crit:', is_crit, 'DirectHit:', is_dh, 'time: ', round(self.elapsed/self.time_multiply,2))
         
-        self.record_log(skill_name, 'DOT',int(dmg),is_crit,is_dh)
+        self.record_log(skill_name, 'DOT',int(dmg),is_crit,is_dh,self.dot_caustic)
         
         return dmg
     
@@ -284,7 +292,7 @@ class Bard():
         if self.print_log:
             print('AutoShot', int(dmg), 'Crit:', is_crit, 'DirectHit:', is_dh, 'time: ', round(self.elapsed/self.time_multiply,2))
         
-        self.record_log('Autoshot', 'Auto',int(dmg),is_crit,is_dh)
+        self.record_log('Autoshot', 'Auto',int(dmg),is_crit,is_dh,self.dot_caustic)
         
         return dmg
     
@@ -553,6 +561,13 @@ class Bard():
             
             self.ethos = 1
             return dmg
+        
+    def potion(self):
+        if self.ngc==2:
+            self.ngc=0
+            self.tick(self.tick_per_act*2)
+            self.cool_potion = 270* self.time_multiply
+            self.buff_potion = 30 * self.time_multiply
     
     def tick(self,iteration=1):
         for i in range(iteration):
@@ -589,6 +604,8 @@ class Bard():
                 self.cool_empyreal -= self.time_per_tick
             if self.cool_sidewinder>0:
                 self.cool_sidewinder -= self.time_per_tick
+            if self.cool_potion>0:
+                self.cool_potion -= self.time_per_tick
             
             if self.buff_battle>0:
                 self.buff_battle -= self.time_per_tick
@@ -598,6 +615,8 @@ class Bard():
                 self.buff_raging -= self.time_per_tick
             if self.buff_barrage>0:
                 self.buff_barrage -= self.time_per_tick
+            if self.buff_potion>0:
+                self.buff_potion -= self.time_per_tick
             
             self.global_cooldown -= self.time_per_tick
                 
@@ -691,10 +710,10 @@ class Bard():
             self.tick(cooldown)
         
     def extract_log(self):
-        df = pd.DataFrame(self.event_log,columns=['Skill', 'Type','Damage','Crit','Dhit','Raging','Radient','Battle','Song','Time'])
+        df = pd.DataFrame(self.event_log,columns=['Skill', 'Type','Damage','Crit','Dhit','Raging','Radient','Battle','Song','Potion','Time','DOT'])
         return df
     
-    def record_log(self,skill_name,dmg_type,dmg,is_crit,is_dh):
+    def record_log(self,skill_name,dmg_type,dmg,is_crit,is_dh,dot):
         if self.buff_raging>0:
             raging = 1
         else:
@@ -718,7 +737,12 @@ class Bard():
         else:
             song = 0
             
-        self.event_log.append((skill_name, dmg_type,int(dmg), int(is_crit),int(is_dh),raging,radient,battle,song, round(self.elapsed/self.time_multiply,3)))
+        if self.buff_potion>0:
+            potion = 1
+        else:
+            potion = 0
+            
+        self.event_log.append((skill_name, dmg_type,int(dmg), int(is_crit),int(is_dh),raging,radient,battle,song,potion, round(self.elapsed/self.time_multiply,3),round(dot*0.01,3)))
 
 class Dancer(Character):
     def __init__(self,cr,dh,dt,stat,wd,spd,period, print_log =0):
@@ -749,7 +773,7 @@ class Dancer(Character):
         self.time_per_tick = 1
         self.tick_per_act = 60
         
-        self.gc = f.f_gc(spd)*self.time_multiply
+        self.gc = f.f_gc(spd) * self.time_multiply
         self.tick_esprit = 2.5 * self.time_multiply
         
         self.event_log = deque()
@@ -879,7 +903,7 @@ class Dancer(Character):
                     self.tick()
             self.cool_technical = 120 * self.time_multiply
             self.tick(int(5.5*self.time_multiply))
-            self.buff_technical = 15 * self.time_multiply
+            self.buff_technical = 20 * self.time_multiply
             self.check_buff()
             self.ab_tillana = 1
             dmg = self.calculate_dmg(1200,'Technical Finish', self.admg, self.acr , self.adh)
@@ -1017,7 +1041,7 @@ class Machinist(Character):
         self.tick_per_act = 60
         
         self.global_cooldown=0
-        self.gc = f.f_gc(spd) * self.time_multiply
+        self.gc = int(f.f_gc(spd) * self.time_multiply)
         
         self.battery = 0
         self.heat = 0
@@ -1297,6 +1321,12 @@ class Machinist(Character):
     def extract_log(self):
         df = pd.DataFrame(self.event_log,columns=['Skill', 'Type','Damage','Crit','Dhit','Time'])
         return df
+    
+def burst_time(t):
+    a = t//120 * 20
+    b = np.min((t%120,20))
+    return a + b
+    
     
 if __name__=='__main__':
     #https://etro.gg/gearset/cec981af-25c7-4ffb-905e-3024411b797a

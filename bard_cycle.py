@@ -53,8 +53,11 @@ def burst(bard):
     bard.wanderer_minuet()
     bard.raging()
     gc_in_wanderer(bard)
-    ngc_in_wanderer(bard)
-    ngc_in_wanderer(bard)
+    if bard.cool_potion==0:
+        bard.potion()
+    else:
+        ngc_in_wanderer(bard)
+        ngc_in_wanderer(bard)
     gc_in_wanderer(bard)
     bard.radient()
     bard.battle()
@@ -169,28 +172,24 @@ if __name__=='__main__':
     pdh = f.f_dh(dh)
     
     dps = 0
+    dps_list = []
     
-    #while dps<7200:
-    bard = job.Bard(cr,dh,dt,stat,wd,spd,period,print_log = 0)
-    
-    bard.buff_potion = 30*bard.time_multiply
-    potion = 0
-    
-    opening(bard)
-    while not bard.done:
-        if bard.cool_wanderer==0:
-            burst(bard)
-        GC(bard)
-        NGC(bard)
-        NGC(bard)
-        if (bard.elapsed>=360 and potion==0):
-            bard.buff_potion = 30 * bard.time_multiply
-            potion = 1
-    
-    act_log = bard.extract_log()
-    dmg_log = act_log['Damage'].to_numpy()
-    dps = np.sum(dmg_log)/(bard.elapsed*0.01)
-    print(dps)
+    for i in range(50):
+        bard = job.Bard(cr,dh,dt,stat,wd,spd,period,print_log = 0)
+        opening(bard)
+        while not bard.done:
+            if bard.cool_wanderer==0:
+                burst(bard)
+            GC(bard)
+            NGC(bard)
+            NGC(bard)
+        
+        act_log = bard.extract_log()
+        dmg_log = act_log['Damage'].to_numpy()
+        dps = np.sum(dmg_log)/(bard.elapsed*0.01)
+        #print(dps)
+        dps_list.append(dps)
+    print(np.mean(dps_list),np.max(dps_list))
     
     '''
     while not bard.buff_army>0:

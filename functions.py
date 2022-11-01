@@ -35,10 +35,19 @@ def random_dmg(dmg):
 def f_spd(sp, sub = 400, div = 1900):
     return int(130*(sp-sub)/div+1000)/1000
     
+'''
 def auto_dmg(stat,weapon,delay,main=390,job=115):
-    atk = (100+int(165*(stat-390)/390))/100
-    auto = int(int(390*115/1000)+weapon*delay/3)
+    atk = (100+int(165*(stat-main)/main))/100
+    auto = int(int((390*115/1000)+weapon)*delay/3)
     return int(atk*auto)
+'''
+
+def auto_dmg(stat,weapon,delay,dt,spd,main=390,job=115):
+    atk = (100+int(165*(stat-main)/main))/100
+    auto = int(int((main*job/1000)+weapon)*delay/3)
+    d1 = 100 * atk * dt
+    d2 = d1 * spd * auto/100
+    return d2
 
 def f_gc(spd):
     return int(2500*(1000+math.ceil(130*(400-spd)/1900))/10000)/100

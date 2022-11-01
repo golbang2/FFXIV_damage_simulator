@@ -62,8 +62,6 @@ def NGC(mach):
         mach.automaton_queen()
     elif (mach.heat>=50 and min(mach.cool_drill,mach.cool_airanchor,mach.cool_chainsaw)> 8 * mach.time_multiply):
         mach.hypercharge()
-    elif ((mach.cool_chainsaw <= mach.global_cooldown or mach.cool_drill <= mach.global_cooldown or mach.cool_airanchor <= mach.global_cooldown) and mach.ab_reassemble>0):
-        mach.reassemble()
     elif (mach.ab_ricochet>0 and mach.ab_ricochet>=mach.ab_gaussround):
         mach.ricochet()
     elif (mach.ab_gaussround>0 and mach.ab_gaussround>mach.ab_ricochet):
@@ -72,6 +70,8 @@ def NGC(mach):
         mach.ricochet()
     elif mach.ab_gaussround>0:
         mach.gaussround()
+    elif ((mach.cool_chainsaw <= mach.global_cooldown or mach.cool_drill <= mach.global_cooldown or mach.cool_airanchor <= mach.global_cooldown) and mach.ab_reassemble>0):
+        mach.reassemble()
         
 def burst(mach):
     if mach.cool_potion==0:
@@ -117,11 +117,22 @@ def burst(mach):
             mach.heatblast()
             NGC(mach)
         mach.drill()
-            
+    
+def skill_dps(skill_name):
+    dps = np.array(act_log[act_log['Skill']==skill_name]['Damage']).sum()/(mach.elapsed*0.01)
+    casts = len(act_log[act_log['Skill']==skill_name]['Damage'])
+    total_dmg = np.array(act_log[act_log['Skill']==skill_name]['Damage']).sum()
+    
+    crit_count = len(act_log[(act_log['Skill']==skill_name) & (act_log['Crit']=='T')])
+    dhit_count = len(act_log[(act_log['Skill']==skill_name) & (act_log['Dhit']=='T')])
+    return dps, casts, round(total_dmg/casts,2),round(crit_count/casts,2),round(dhit_count/casts,2)
     
 if __name__=='__main__':
     #https://etro.gg/gearset/e8c4176b-aad2-4719-9774-36f6d0377624
-    period = 300
+    period = 410
+    iteration = 100
+    print_log = 0
+    
     cr = 2193
     dt = 1507
     dh = 1662
@@ -137,18 +148,26 @@ if __name__=='__main__':
     pcr,dcr = f.f_crit(cr)
     pdh = f.f_dh(dh)
     
-    mach = job.Machinist(cr,dh,dt,dex,wd,spd,period,print_log = 1)
+    dps_list = []
+            
+    for i in range(iteration):
+        if i ==iteration-1:
+            print_log = 1
+        mach = job.Machinist(cr,dh,dt,dex,wd,spd,weapon_delay,period,print_log = print_log)
+        opening(mach)
+        while not mach.done:
+            if (mach.elapsed*0.01%120)<5:
+                burst(mach)
+            GC(mach)
+            NGC(mach)
+            NGC(mach)
+        
+        act_log = mach.extract_log()
+        dmg_log = act_log['Damage'].to_numpy()
+        dps = np.sum(dmg_log)/(mach.elapsed*0.01)
+        dps_list.append(dps)
     
-    opening(mach)
-    while not mach.done:
-        if 123*mach.time_multiply>mach.elapsed>=120*mach.time_multiply:
-            print('burst')
-            burst(mach)
-        GC(mach)
-        NGC(mach)
-        NGC(mach)
-    '''
-    #act_log = mach.extract_log()
-    #dmg_log = act_log['Damage'].to_numpy()
-    #print(np.sum(dmg_log)/(mach.elapsed*0.01))
-    '''
+    print('Job: Machinist')
+    print('iterations: ',iteration)
+    print('Average: ',np.mean(dps_list))
+    print('Max: ',np.max(dps_list))

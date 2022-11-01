@@ -144,11 +144,23 @@ def NGC(bard):
         ngc_in_mage(bard)
     elif bard.buff_army>0:
         ngc_in_army(bard)
-
         
+def skill_dps(skill_name):
+    dps = np.array(act_log[act_log['Skill']==skill_name]['Damage']).sum()/(bard.elapsed*0.01)
+    casts = len(act_log[act_log['Skill']==skill_name]['Damage'])
+    total_dmg = np.array(act_log[act_log['Skill']==skill_name]['Damage']).sum()
+    
+    crit_count = len(act_log[(act_log['Skill']==skill_name) & (act_log['Crit']=='T')])
+    dhit_count = len(act_log[(act_log['Skill']==skill_name) & (act_log['Dhit']=='T')])
+    return dps, casts, total_dmg,crit_count/casts,dhit_count/casts
+
+
 if __name__=='__main__':
     #https://etro.gg/gearset/cec981af-25c7-4ffb-905e-3024411b797a
     period = 410
+    iteration = 50
+    print_log = 0
+    
     cr = 2229
     dt = 1381
     dh = 1662
@@ -174,8 +186,10 @@ if __name__=='__main__':
     dps = 0
     dps_list = []
     
-    for i in range(50):
-        bard = job.Bard(cr,dh,dt,stat,wd,spd,period,print_log = 0)
+    for i in range(iteration):
+        if i==iteration-1:
+            print_log =1
+        bard = job.Bard(cr,dh,dt,stat,wd,spd,period,print_log = print_log)
         opening(bard)
         while not bard.done:
             if bard.cool_wanderer==0:
@@ -187,17 +201,9 @@ if __name__=='__main__':
         act_log = bard.extract_log()
         dmg_log = act_log['Damage'].to_numpy()
         dps = np.sum(dmg_log)/(bard.elapsed*0.01)
-        #print(dps)
-        dps_list.append(dps)
-    print(np.mean(dps_list),np.max(dps_list))
+        dps_list.append(dps)    
+    print('Job: Bard')
+    print('iterations:',iteration)
+    print('Average:',np.mean(dps_list))
+    print('Max:',np.max(dps_list))
     
-    '''
-    while not bard.buff_army>0:
-        GC(bard)
-        NGC(bard)
-        NGC(bard)
-        
-    act_log = bard.extract_log()
-    dmg_log = act_log['Damage'].to_numpy()
-    print(np.sum(dmg_log)/(bard.elapsed*0.01))
-    '''

@@ -137,7 +137,7 @@ if __name__=='__main__':
     dt = 1507
     dh = 1662
     spd = 400
-    dex = 2574
+    dex = int(2574*1.05)
     wd = 120
     weapon_delay = 2.64
 

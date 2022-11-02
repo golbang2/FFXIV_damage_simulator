@@ -650,11 +650,11 @@ class Bard():
                     self.tick_dot_storm = 3* self.time_multiply   
             
             if self.tick_autoshot<=0:
-                self.tick_autoshot = 3* self.time_multiply
+                self.tick_autoshot = self.weapon_delay* self.time_multiply
                 if self.buff_army>0:
-                    self.tick_autoshot = 3 * (1-self.stack_army * 0.04) * self.time_multiply
+                    self.tick_autoshot = self.weapon_delay * (1-self.stack_army * 0.04) * self.time_multiply
                 if self.buff_army_muse>0:
-                    self.tick_autoshot = 3 * 0.88 * self.time_multiply
+                    self.tick_autoshot = self.weapon_delay * 0.88 * self.time_multiply
                 self.auto_shot()
                 
             if self.elapsed > self.left_time*self.time_multiply:
@@ -753,7 +753,7 @@ class Bard():
 
 class Dancer(Character):
     def __init__(self,cr,dh,dt,stat,wd,spd,weapon_delay,period, print_log =0):
-        super().__init__(cr,dh,dt,stat,wd,spd,weapon_delay,period,print_log)
+        #super().__init__(cr,dh,dt,stat,wd,spd,weapon_delay,period,print_log)
         
         self.pcr,self.dcr = f.f_crit(cr)
         self.pdh = f.f_dh(dh)
@@ -768,9 +768,16 @@ class Dancer(Character):
         self.left_time = period
         self.elapsed = 0
         self.tick_autoshot = 0
+        self.done = 0
+        self.combo = 0
         
-        self.prob_esprit_in_burst = 0.335
-        self.prob_esprit_in_normal = 0.125
+        self.print_log = print_log
+        self.time_multiply = 100
+        self.time_per_tick = 1
+        self.tick_per_act = 60
+        
+        self.prob_esprit_in_burst = 0.38
+        self.prob_esprit_in_normal = 0.13
         
         self.initialize_cooldown()
         self.initialize_buff()
@@ -778,21 +785,20 @@ class Dancer(Character):
         
         self.esprit = 0
         
-        self.print_log = print_log
-        self.time_multiply = 100
-        self.time_per_tick = 1
-        self.tick_per_act = 60
-        
         self.gc = f.f_gc(spd) * self.time_multiply
         self.tick_esprit = 2.5 * self.time_multiply
         
         self.event_log = deque()
+        
+        self.casts_saberdance_burst = 0
+        self.casts_saberdance = 0
         
     def initialize_cooldown(self):
         self.cool_devilment = 0
         self.cool_flourish = 0 
         self.cool_standard = 0
         self.cool_technical = 0
+        self.cool_potion = 270 * self.time_multiply
         
         self.ab_reverse_cascade = 0
         self.ab_fountainfall = 0
@@ -806,6 +812,7 @@ class Dancer(Character):
         self.buff_standard = 0
         self.buff_technical = 0
         self.buff_devilment = 0
+        self.buff_potion = 28.5 * self.time_multiply
         
     def check_buff(self):             
         self.admg = 1.
@@ -815,6 +822,8 @@ class Dancer(Character):
         if self.buff_standard>0:
             self.admg *=1.05
         if self.buff_technical>0:
+            self.admg *=1.05
+        if self.buff_potion>0:
             self.admg *=1.05
             
         if self.buff_devilment>0:
@@ -827,11 +836,12 @@ class Dancer(Character):
                 self.tick()
                 
         dmg,log = self.calculate_dmg(220, 'Cascade' , self.admg, self.acr , self.adh)
+        self.put_log(log)
         if np.random.random()<0.5:
             self.ab_reverse_cascade = 1
-            if self.print_log:
-                print('Reverse Cascade Available')
         self.esprit +=5
+        if self.esprit>100:
+            self.esprit = 100
         self.weapon_skill()
         self.combo = 1
         return dmg
@@ -843,14 +853,15 @@ class Dancer(Character):
             
         if self.combo == 1:
             dmg,log = self.calculate_dmg(280, 'Fountain', self.admg, self.acr , self.adh)
+            self.put_log(log)
             if np.random.random()<0.5:
                 self.ab_fountainfall = 1
-                if self.print_log:
-                    print('Fountainfall Available')
         else:
             dmg,log = self.calculate_dmg(100, 'Fountain', self.admg, self.acr , self.adh)
-
+            self.put_log(log)
         self.esprit +=5
+        if self.esprit>100:
+            self.esprit = 100
         self.weapon_skill()
         self.combo =0
         return dmg
@@ -862,6 +873,7 @@ class Dancer(Character):
                     self.tick()
             self.ab_reverse_cascade-= 1
             dmg,log = self.calculate_dmg(280, 'Reverse Cascade', self.admg, self.acr , self.adh)
+            self.put_log(log)
             if np.random.random()<0.5:
                 self.ab_fandance += 1
                 if self.print_log:
@@ -869,6 +881,8 @@ class Dancer(Character):
                 if self.ab_fandance>4:
                     self.ab_fandance = 4
             self.esprit +=10
+            if self.esprit>100:
+                self.esprit = 100
             self.weapon_skill()
             return dmg
         
@@ -879,6 +893,7 @@ class Dancer(Character):
                     self.tick()
             self.ab_fountainfall -= 1
             dmg ,log= self.calculate_dmg(340, 'fountainfall', self.admg, self.acr , self.adh)
+            self.put_log(log)
             if np.random.random()<0.5:
                 self.ab_fandance += 1
                 if self.print_log:
@@ -887,10 +902,14 @@ class Dancer(Character):
                     self.ab_fandance = 4
 
             self.esprit +=10
+            if self.esprit>100:
+                self.esprit = 100
             self.weapon_skill()
             return dmg
         
     def standard_finish(self):
+        if self.cool_standard<self.global_cooldown:
+            self.tick(int(self.cool_standard))
         if self.cool_standard<=0:
             if self.global_cooldown>0:
                 while self.global_cooldown>0:
@@ -900,18 +919,22 @@ class Dancer(Character):
             self.buff_standard = 60 * self.time_multiply
             self.check_buff()
             dmg,log = self.calculate_dmg(720, 'Standard Finish', self.admg, self.acr , self.adh)
+            self.put_log(log)
             self.weapon_skill(1.5)
             return dmg
             
     def opening_standard_finish(self):
-        self.cool_standard = 16* self.time_multiply
+        self.cool_standard = 15* self.time_multiply
         self.buff_standard = 60 * self.time_multiply
         self.check_buff()
         dmg,log = self.calculate_dmg(720, 'Standard Finish', self.admg, self.acr , self.adh)
+        self.put_log(log)
         self.weapon_skill(1.5)
         return dmg
             
     def technical_finish(self):
+        if self.cool_technical<self.global_cooldown:
+            self.tick(int(self.cool_technical))
         if self.cool_technical<=0:
             if self.global_cooldown>0:
                 while self.global_cooldown>0:
@@ -922,6 +945,7 @@ class Dancer(Character):
             self.check_buff()
             self.ab_tillana = 1
             dmg ,log= self.calculate_dmg(1200,'Technical Finish', self.admg, self.acr , self.adh)
+            self.put_log(log)
             self.weapon_skill(1.5)
             return dmg
         
@@ -932,7 +956,12 @@ class Dancer(Character):
                     self.tick()
             self.esprit -=50
             dmg ,log= self.calculate_dmg(480, 'Saber Dance', self.admg, self.acr , self.adh)
+            self.put_log(log)
             self.weapon_skill()
+            if self.buff_technical>0:
+                self.casts_saberdance_burst+=1
+            self.casts_saberdance+=1
+            
             return dmg
             
     def tillana(self):
@@ -941,6 +970,7 @@ class Dancer(Character):
                 while self.global_cooldown>0:
                     self.tick()
             dmg,log = self.calculate_dmg(360, 'Tillana', self.admg, self.acr , self.adh)
+            self.put_log(log)
             self.buff_standard = 60 * self.time_multiply
             self.ab_tillana = 0
             self.weapon_skill(1.5)
@@ -951,9 +981,9 @@ class Dancer(Character):
             if self.global_cooldown>0:
                 while self.global_cooldown>0:
                     self.tick()
-                    
             self.ab_starfall = 0
             dmg,log = self.calculate_dmg(600,'Starfall Dance',fix_cr=1, fix_dh = 1)
+            self.put_log(log)
             self.weapon_skill()
             return dmg
     
@@ -965,6 +995,8 @@ class Dancer(Character):
             self.ab_fourth = 1
             self.cool_flourish = 60 * self.time_multiply
             self.ability()
+            if self.print_log:
+                print('Flourish Time:', self.elapsed)
     
     def devilment(self):
         if (self.cool_devilment<=0 and self.ngc>0):
@@ -972,10 +1004,13 @@ class Dancer(Character):
             self.cool_devilment = 120 * self.time_multiply
             self.ab_starfall = 1
             self.ability()
+            if self.print_log:
+                print('Devilment Time:', self.elapsed)
     
     def fandance(self):
         if (self.ab_fandance>0 and self.ngc>0): 
             dmg,log = self.calculate_dmg(150,'First FanDance', self.admg, self.acr , self.adh)
+            self.put_log(log)
             self.ab_fandance-=1
             if np.random.random()<0.5:
                 self.ab_third = 1
@@ -987,6 +1022,7 @@ class Dancer(Character):
     def fandance_third(self):
         if (self.ab_third>0 and self.ngc>0): 
             dmg,log = self.calculate_dmg(200,'Third FanDance', self.admg, self.acr , self.adh)
+            self.put_log(log)
             self.ab_third = 0
             self.ability()
             return dmg
@@ -994,20 +1030,26 @@ class Dancer(Character):
     def fandance_fourth(self):
         if (self.ab_fourth>0 and self.ngc>0):
             dmg,log = self.calculate_dmg(300,'Fourth FanDance', self.admg, self.acr , self.adh)
+            self.put_log(log)
             self.ab_fourth = 0
             self.ability()
             return dmg
+    def potion(self):
+        if self.ngc==2:
+            self.ngc=0
+            self.tick(self.tick_per_act*2)
+            self.cool_potion = 270* self.time_multiply
+            self.buff_potion = 30 * self.time_multiply
         
     def tick(self,iteration=1):
         for i in range(iteration):
             self.elapsed += self.time_per_tick
-                
-            self.tick_autoshot-=self.time_per_tick
             
             self.cool_devilment -= self.time_per_tick
             self.cool_flourish -= self.time_per_tick
             self.cool_standard -= self.time_per_tick
             self.cool_technical -= self.time_per_tick
+            self.cool_potion -= self.time_per_tick
             
             self.buff_devilment -= self.time_per_tick
             if self.buff_devilment == 0:
@@ -1018,6 +1060,8 @@ class Dancer(Character):
             self.buff_technical -= self.time_per_tick
             if self.buff_technical == 0:
                 self.check_buff()
+            if self.buff_potion>0:
+                self.buff_potion -= self.time_per_tick
             
             self.global_cooldown -= self.time_per_tick
             
@@ -1027,16 +1071,48 @@ class Dancer(Character):
                 if self.buff_technical>0:
                     if np.random.random()<self.prob_esprit_in_burst:
                         self.esprit += 10
+                        if self.esprit>100:
+                            self.esprit = 100
                 else:
                     if np.random.random()<self.prob_esprit_in_normal:
                         self.esprit += 10
+                        if self.esprit>100:
+                            self.esprit = 100
+            
+            self.tick_autoshot-=self.time_per_tick
+            if self.tick_autoshot<=0:
+                self.tick_autoshot = self.weapon_delay* self.time_multiply
+                self.check_buff()
+                dmg,log = self.auto_shot(self.admg,self.acr,self.adh)
+                self.put_log(log)
                 
-            if self.tick_autoshot==0:
-                self.tick_autoshot = 3* self.time_multiply
-                self.auto_shot()
-                
-            if self.elapsed > self.left_time:
+            if self.elapsed > self.left_time * self.time_multiply:
                 self.done=1
+                
+    def buff_state(self):
+        if self.buff_technical>0:
+            technical = 1
+        else:
+            technical = 0
+        
+        if self.buff_devilment>0:
+            devilment = 1
+        else:
+            devilment = 0
+        
+        if self.buff_potion>0:
+            potion = 1
+        else:
+            potion = 0
+        return (technical,devilment, potion)
+    
+    def extract_log(self):
+        df = pd.DataFrame(self.event_log,columns=['Skill', 'Type','Damage','Crit','Dhit','Time','Technical','Devilment','Potion'])
+        return df
+    
+    def put_log(self,log_tuple):
+        add_tuple = self.buff_state()
+        self.event_log.append(log_tuple+ add_tuple)
                     
 class Machinist(Character):
     def __init__(self,cr,dh,dt,stat,wd,spd,weapon_delay,period,print_log = 0):
@@ -1382,7 +1458,6 @@ class Machinist(Character):
             self.buff_reassemble -= self.time_per_tick
             self.buff_hypercharge -= self.time_per_tick
             if self.buff_potion>0:
-                
                 self.buff_potion -= self.time_per_tick
             
             self.global_cooldown -= self.time_per_tick
@@ -1394,7 +1469,7 @@ class Machinist(Character):
             
             self.tick_autoshot-=self.time_per_tick
             if self.tick_autoshot<=0:
-                self.tick_autoshot = 2.64* self.time_multiply
+                self.tick_autoshot = self.weapon_delay* self.time_multiply
                 dmg, log = self.auto_shot(self.adm)
                 self.put_log(log)
                 

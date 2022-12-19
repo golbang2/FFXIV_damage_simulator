@@ -750,6 +750,46 @@ class Bard():
             potion = 0
             
         self.event_log.append((skill_name, dmg_type,int(dmg), int(is_crit),int(is_dh),raging,radient,battle,song,potion, round(self.elapsed/self.time_multiply,3),round(dot*0.01,3)))
+        
+    def action(self,action_number):
+        if action_number == 0:
+            self.burst_shot()
+        if action_number == 1:
+            self.causticbite()
+        if action_number == 2:
+            self.stormbite()
+        if action_number == 3:
+            self.apex_arrow()
+        if action_number == 4:
+            self.blast_arrow()
+        if action_number == 5:
+            self.iron_jaws()
+        if action_number == 6:
+            self.raging()
+        if action_number == 7:
+            self.battle()
+        if action_number == 8:
+            self.barrage()
+        if action_number == 9:
+            self.radient()
+        if action_number == 10:
+            self.blood()
+        if action_number == 11:
+            self.empyreal()
+        if action_number == 12:
+            self.sidewinder()
+        if action_number == 13:
+            self.pitch()
+        if action_number == 14:
+            self.wanderer_minuet()
+        if action_number == 15:
+            self.mage_ballad()
+        if action_number == 16:
+            self.army_paeon()
+    def state(self):
+        #cooltime, buff,gc, dot
+        
+        
 
 class Dancer(Character):
     def __init__(self,cr,dh,dt,stat,wd,spd,weapon_delay,period, print_log =0):

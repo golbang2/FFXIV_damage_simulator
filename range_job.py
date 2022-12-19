@@ -776,8 +776,8 @@ class Dancer(Character):
         self.time_per_tick = 1
         self.tick_per_act = 60
         
-        self.prob_esprit_in_burst = 0.38
-        self.prob_esprit_in_normal = 0.13
+        self.prob_esprit_in_burst = 0.51
+        self.prob_esprit_in_normal = 0.1
         
         self.initialize_cooldown()
         self.initialize_buff()

@@ -6,9 +6,9 @@ Created on Mon Sep 12 16:26:50 2022
 """
 
 import range_job as job
-import functions as f
 import time
 import numpy as np
+import matplotlib.pyplot as plt
 
 def opening(bard):
     bard.stormbite()
@@ -158,7 +158,7 @@ def skill_dps(skill_name):
 if __name__=='__main__':
     #https://etro.gg/gearset/cec981af-25c7-4ffb-905e-3024411b797a
     period = 410
-    iteration = 50
+    iteration = 200
     print_log = 0
     
     cr = 2229
@@ -167,12 +167,6 @@ if __name__=='__main__':
     spd = 479
     stat = int(2574*1.05)
     
-    #cr = 2028
-    #dt = 1526
-    #dh = 1284
-    #spd = 763
-    #stat = 2551
-    
     wd = 120
     weapon_delay = 3.04
 
@@ -180,11 +174,8 @@ if __name__=='__main__':
     sub = 400
     div = 1900
     
-    pcr,dcr = f.f_crit(cr)
-    pdh = f.f_dh(dh)
-    
     dps = 0
-    dps_list = []
+    bard_dps_list = []
     
     for i in range(iteration):
         if i==iteration-1:
@@ -201,9 +192,12 @@ if __name__=='__main__':
         act_log = bard.extract_log()
         dmg_log = act_log['Damage'].to_numpy()
         dps = np.sum(dmg_log)/(bard.elapsed*0.01)
-        dps_list.append(dps)    
+        bard_dps_list.append(dps)    
     print('Job: Bard')
     print('iterations:',iteration)
-    print('Average:',np.mean(dps_list))
-    print('Max:',np.max(dps_list))
-    
+    print('Average:',np.mean(bard_dps_list))
+    print('Max:',np.max(bard_dps_list))
+    plt.figure(figsize = (10,4))
+    plt.hist(bard_dps_list, bins=15,rwidth = 0.8, color = 'green')
+    plt.xlabel('Bard DPS', fontsize = 14)
+    plt.show()

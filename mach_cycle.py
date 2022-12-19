@@ -9,6 +9,7 @@ import range_job as job
 import functions as f
 import time
 import numpy as np
+import matplotlib.pyplot as plt
 
 def opening(mach):
     mach.buff_reassemble = 1 * mach.time_multiply
@@ -130,7 +131,7 @@ def skill_dps(skill_name):
 if __name__=='__main__':
     #https://etro.gg/gearset/e8c4176b-aad2-4719-9774-36f6d0377624
     period = 410
-    iteration = 100
+    iteration = 200
     print_log = 0
     
     cr = 2193
@@ -145,10 +146,7 @@ if __name__=='__main__':
     sub = 400
     div = 1900
     
-    pcr,dcr = f.f_crit(cr)
-    pdh = f.f_dh(dh)
-    
-    dps_list = []
+    mach_dps_list = []
             
     for i in range(iteration):
         if i ==iteration-1:
@@ -165,9 +163,13 @@ if __name__=='__main__':
         act_log = mach.extract_log()
         dmg_log = act_log['Damage'].to_numpy()
         dps = np.sum(dmg_log)/(mach.elapsed*0.01)
-        dps_list.append(dps)
+        mach_dps_list.append(dps)
     
     print('Job: Machinist')
     print('iterations: ',iteration)
-    print('Average: ',np.mean(dps_list))
-    print('Max: ',np.max(dps_list))
+    print('Average: ',np.mean(mach_dps_list))
+    print('Max: ',np.max(mach_dps_list))
+    plt.figure(figsize = (10,4))
+    plt.hist(mach_dps_list, bins=15,rwidth = 0.8)
+    plt.xlabel('Machinist DPS', fontsize = 14)
+    plt.show()

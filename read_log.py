@@ -8,9 +8,17 @@ Created on Thu Aug  4 20:17:23 2022
 import numpy as np
 import pandas as pd
 import re
+import os
 
 def burst_time(t):
     return (t//120 * 20) + np.min((t%120,20))
+
+def read_folder(path):
+    file_list = os.listdir(path)
+    file_name_list = []
+    for i in file_list:
+        file_name_list.append(path+i)
+    return file_name_list
 
 class read_mach_log():
     def __init__(self, path = "D:/game_plan/FFXIV/FF Logs - Combat Analysis for FF1.csv", gc = 2.5):
@@ -84,6 +92,28 @@ class read_mach_log():
         self.activation_log.insert(3,'global_cooldown',gc)
         self.activation_log.insert(4,'potency',potency)
         return self.activation_log
+    
+class read_dancer_log():
+    def __init__(self, path = "D:/game_plan/FFXIV/FF Logs - Combat Analysis for FF1.csv", gc = 2.5):
+        self.activation_log = pd.read_csv(path)
+        self.activation_log = self.activation_log.fillna(0)
+        
+        p = re.compile('prepares')
+        for i in range(len(self.activation_log)-1,0,-1):
+            if (p.search(self.activation_log['Event'][i]) == None):
+                self.activation_log = self.activation_log.drop(index=i)
+        
+    def count_saber(self):
+        saberdance = 0
+        in_burst = 0
+        
+        get_damage = re.compile("\+(.+?)\%\sdamage")
+        for i in self.activation_log['Event']:
+            damage = int(get_damage.findall(i)[0])
+            saberdance+=1
+            if damage>=10:
+                in_burst+=1
+        return in_burst, saberdance
         
 class read_bard_log():
     def __init__(self,path = 'd:/game_plan/FFXIV/noya ki-erichthonios.csv', gc = 2.48):
